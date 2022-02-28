@@ -2,7 +2,6 @@ package jade;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
 import static org.lwjgl.glfw.GLFW.GLFW_MAXIMIZED;
 import static org.lwjgl.glfw.GLFW.GLFW_RESIZABLE;
 import static org.lwjgl.glfw.GLFW.GLFW_TRUE;
@@ -33,6 +32,8 @@ import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
+import util.Time;
+
 public final class Window {
     private static final MouseListener mouseListener = MouseListener.getInstance();
     private static final KeyListener keyListener = KeyListener.getInstance();
@@ -42,6 +43,8 @@ public final class Window {
     private final int width;
     private final int height;
     private final String title;
+
+    private Scene currentScene;
 
     private Window() {
         this.width = 1920;
@@ -70,6 +73,19 @@ public final class Window {
         // Terminate GLFW and free the error callback
         glfwTerminate();
         glfwSetErrorCallback(null).free();
+    }
+
+    public void changeScene(int index) {
+        switch(index) {
+            case 0:
+                currentScene = new LevelScene();
+                break;
+            case 1:
+                currentScene = new LevelEditorScene();
+                break;
+            default:
+                assert false : "Unknown scene '" + index + "'";
+        }
     }
 
     private void init() {
@@ -108,17 +124,31 @@ public final class Window {
         // creates the GLCapabilities instance and makes the OpenGL
         // bindings available for use.
         GL.createCapabilities();
+
+        currentScene = new LevelScene();
     }
 
     private void loop() {
+        double beginTime = Time.getTime();
+        double endTime;
+        double dt = -1.0;
+
         while(!glfwWindowShouldClose(glfwWindow)) {
             // Poll events
             glfwPollEvents();
 
-            glClearColor(r, g, b, a);
+            glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
+            if (dt > 0) {
+                currentScene.update(dt);
+            }
+
             glfwSwapBuffers(glfwWindow);
+
+            endTime = Time.getTime();
+            dt = endTime - beginTime;
+            beginTime = Time.getTime();
         }
     }
 }
