@@ -1,8 +1,12 @@
 package jade;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
+import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR;
+import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
 import static org.lwjgl.glfw.GLFW.GLFW_MAXIMIZED;
+import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE;
+import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_PROFILE;
 import static org.lwjgl.glfw.GLFW.GLFW_RESIZABLE;
 import static org.lwjgl.glfw.GLFW.GLFW_TRUE;
 import static org.lwjgl.glfw.GLFW.GLFW_VISIBLE;
@@ -24,8 +28,11 @@ import static org.lwjgl.glfw.GLFW.glfwTerminate;
 import static org.lwjgl.glfw.GLFW.glfwWindowHint;
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_RENDERER;
+import static org.lwjgl.opengl.GL11.GL_VERSION;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.glGetString;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 import org.lwjgl.Version;
@@ -78,10 +85,12 @@ public final class Window {
     public void changeScene(int index) {
         switch(index) {
             case 0:
-                currentScene = new LevelScene();
+                currentScene = new LevelEditorScene();
+                currentScene.init();
                 break;
             case 1:
-                currentScene = new LevelEditorScene();
+                currentScene = new LevelScene();
+                currentScene.init();
                 break;
             default:
                 assert false : "Unknown scene '" + index + "'";
@@ -96,6 +105,12 @@ public final class Window {
         }
 
         glfwDefaultWindowHints();
+
+        // For MACOS
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
         glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
@@ -124,8 +139,10 @@ public final class Window {
         // creates the GLCapabilities instance and makes the OpenGL
         // bindings available for use.
         GL.createCapabilities();
+        System.err.println("OpenGL version: " + glGetString(GL_VERSION));
+        System.err.println("Device: " + glGetString(GL_RENDERER));
 
-        currentScene = new LevelScene();
+        get().changeScene(0);
     }
 
     private void loop() {
