@@ -19,6 +19,7 @@ import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
+import org.joml.Vector2f;
 import org.lwjgl.BufferUtils;
 
 import renderer.Shader;
@@ -27,9 +28,9 @@ public class LevelEditorScene extends Scene {
 
     private float[] vertexArray = {
             // Position             // Color
-            0.5f, -0.5f, 0.0f,      1.0f, 0.0f, 0.0f, 1.0f, // Bottom right 0
-            -0.5f, 0.5f, 0.0f,      0.0f, 1.0f, 0.0f, 1.0f, // Top left     1
-            0.5f, 0.5f, 0.0f,       0.0f, 0.0f, 1.0f, 1.0f, // Top right    2
+            100.5f, 0.5f, 0.0f,      1.0f, 0.0f, 0.0f, 1.0f, // Bottom right 0
+            0.5f, 100.5f, 0.0f,      0.0f, 1.0f, 0.0f, 1.0f, // Top left     1
+            100.5f, 100.5f, 0.0f,       0.0f, 0.0f, 1.0f, 1.0f, // Top right    2
             -0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 0.0f, 1.0f  // Bottom left  3
     };
 
@@ -53,6 +54,8 @@ public class LevelEditorScene extends Scene {
 
     @Override
     public void init() {
+        this.camera = new Camera(new Vector2f());
+
         defaultShader = new Shader("assets/shaders/default.glsl");
         defaultShader.compile();
 
@@ -91,7 +94,11 @@ public class LevelEditorScene extends Scene {
     @Override
     public void update(double deltaTime) {
         // Use shader
+        camera.position.x -= deltaTime * 50f;
+
         defaultShader.use();
+        defaultShader.setMat4f("uProjection", camera.getProjectionMatrix());
+        defaultShader.setMat4f("uView", camera.getViewMatrix());
 
         // Bind VAO we want to use
         glBindVertexArray(vaoId);

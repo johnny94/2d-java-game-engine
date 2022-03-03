@@ -14,11 +14,14 @@ import static org.lwjgl.opengl.GL20.glGetProgramInfoLog;
 import static org.lwjgl.opengl.GL20.glGetProgrami;
 import static org.lwjgl.opengl.GL20.glGetShaderInfoLog;
 import static org.lwjgl.opengl.GL20.glGetShaderi;
+import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL20.glLinkProgram;
 import static org.lwjgl.opengl.GL20.glShaderSource;
+import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
 import static org.lwjgl.opengl.GL20.glUseProgram;
 
 import java.io.IOException;
+import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.EnumMap;
@@ -27,6 +30,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.joml.Matrix4f;
+import org.lwjgl.system.MemoryStack;
 
 public final class Shader {
     private enum ShaderType {
@@ -127,5 +133,12 @@ public final class Shader {
 
     public void detach() {
         glUseProgram(0);
+    }
+
+    public void setMat4f(String varName, Matrix4f mat4) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            FloatBuffer fb = mat4.get(stack.mallocFloat(16));
+            glUniformMatrix4fv(glGetUniformLocation(this.shaderProgramId, varName), false, fb);
+        }
     }
 }
