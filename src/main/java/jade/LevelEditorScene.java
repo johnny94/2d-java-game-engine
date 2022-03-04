@@ -23,6 +23,7 @@ import org.joml.Vector2f;
 import org.lwjgl.BufferUtils;
 
 import renderer.Shader;
+import util.Time;
 
 public class LevelEditorScene extends Scene {
 
@@ -95,10 +96,12 @@ public class LevelEditorScene extends Scene {
     public void update(double deltaTime) {
         // Use shader
         camera.position.x -= deltaTime * 50f;
+        camera.position.y -= deltaTime * 20f;
 
         defaultShader.use();
         defaultShader.setMat4f("uProjection", camera.getProjectionMatrix());
         defaultShader.setMat4f("uView", camera.getViewMatrix());
+        defaultShader.setFloat("uTime", (float)Time.getTime());
 
         // Bind VAO we want to use
         glBindVertexArray(vaoId);

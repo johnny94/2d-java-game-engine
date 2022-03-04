@@ -17,6 +17,12 @@ import static org.lwjgl.opengl.GL20.glGetShaderi;
 import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL20.glLinkProgram;
 import static org.lwjgl.opengl.GL20.glShaderSource;
+import static org.lwjgl.opengl.GL20.glUniform1f;
+import static org.lwjgl.opengl.GL20.glUniform1i;
+import static org.lwjgl.opengl.GL20.glUniform2f;
+import static org.lwjgl.opengl.GL20.glUniform3f;
+import static org.lwjgl.opengl.GL20.glUniform4f;
+import static org.lwjgl.opengl.GL20.glUniformMatrix3fv;
 import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
 import static org.lwjgl.opengl.GL20.glUseProgram;
 
@@ -31,7 +37,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.joml.Matrix3f;
 import org.joml.Matrix4f;
+import org.joml.Vector4f;
 import org.lwjgl.system.MemoryStack;
 
 public final class Shader {
@@ -45,6 +53,8 @@ public final class Shader {
             return Optional.ofNullable(stringToEnum.get(name));
         }
     }
+
+    private boolean beingUsed;
 
     private int shaderProgramId;
     private final String filepath;
@@ -128,17 +138,59 @@ public final class Shader {
     }
 
     public void use() {
-        glUseProgram(shaderProgramId);
+        if (!beingUsed) {
+            glUseProgram(shaderProgramId);
+            beingUsed = true;
+        }
     }
 
     public void detach() {
         glUseProgram(0);
+        beingUsed = false;
     }
 
     public void setMat4f(String varName, Matrix4f mat4) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             FloatBuffer fb = mat4.get(stack.mallocFloat(16));
-            glUniformMatrix4fv(glGetUniformLocation(this.shaderProgramId, varName), false, fb);
+            use();
+            glUniformMatrix4fv(getUniformLocation(varName), false, fb);
         }
+    }
+
+    public void setMat3f(String varName, Matrix3f mat3) {
+        try(MemoryStack stack = MemoryStack.stackPush()) {
+            FloatBuffer fb = mat3.get(stack.mallocFloat(9));
+            use();
+            glUniformMatrix3fv(getUniformLocation(varName), false, fb);
+        }
+    }
+
+    public void setVec4f(String varName, Vector4f vec) {
+        use();
+        glUniform4f(getUniformLocation(varName), vec.x, vec.y, vec.z, vec.w);
+    }
+
+    public void setVec3f(String varName, Vector4f vec) {
+        use();
+        glUniform3f(getUniformLocation(varName), vec.x, vec.y, vec.z);
+    }
+
+    public void setVec2f(String varName, Vector4f vec) {
+        use();
+        glUniform2f(getUniformLocation(varName), vec.x, vec.y);
+    }
+
+    public void setFloat(String varName, float val) {
+        use();
+        glUniform1f(getUniformLocation(varName), val);
+    }
+
+    public void setInt(String varName, int val) {
+        use();
+        glUniform1i(getUniformLocation(varName), val);
+    }
+
+    private int getUniformLocation(String varName) {
+        return glGetUniformLocation(this.shaderProgramId, varName);
     }
 }
