@@ -24,6 +24,7 @@ import java.nio.IntBuffer;
 import org.joml.Vector2f;
 import org.lwjgl.BufferUtils;
 
+import components.SpriteRenderer;
 import renderer.Shader;
 import renderer.Texture;
 import util.Time;
@@ -56,11 +57,18 @@ public class LevelEditorScene extends Scene {
 
     private Shader defaultShader;
     private Texture testTexture;
+    private GameObject testGameObject;
+
+    private boolean isFirstTime = true;
 
     @Override
     public void init() {
         this.camera = new Camera(new Vector2f());
         this.testTexture = new Texture("assets/images/awesomeface.png");
+
+        this.testGameObject = new GameObject("Test game object");
+        this.testGameObject.addComponent(new SpriteRenderer());
+        this.addGameObject(this.testGameObject);
 
         defaultShader = new Shader("assets/shaders/default.glsl");
         defaultShader.compile();
@@ -104,8 +112,7 @@ public class LevelEditorScene extends Scene {
     @Override
     public void update(double deltaTime) {
         // Use shader
-        camera.position.x -= deltaTime * 50f;
-        camera.position.y -= deltaTime * 20f;
+        camera.position = new Vector2f(-200.0f, -500.0f);
 
         defaultShader.use();
 
@@ -132,5 +139,17 @@ public class LevelEditorScene extends Scene {
         glDisableVertexAttribArray(1);
         glBindVertexArray(0);
         defaultShader.detach();
+
+        // Just For testing
+        if (isFirstTime) {
+            GameObject go = new GameObject("Test object 2");
+            go.addComponent(new SpriteRenderer());
+            addGameObject(go);
+            isFirstTime = false;
+        }
+
+        for (GameObject g : gameObjects) {
+            g.update(deltaTime);
+        }
     }
 }

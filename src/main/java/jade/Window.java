@@ -86,15 +86,16 @@ public final class Window {
         switch(index) {
             case 0:
                 currentScene = new LevelEditorScene();
-                currentScene.init();
                 break;
             case 1:
                 currentScene = new LevelScene();
-                currentScene.init();
                 break;
             default:
                 assert false : "Unknown scene '" + index + "'";
         }
+
+        currentScene.init();
+        currentScene.start();
     }
 
     private void init() {
