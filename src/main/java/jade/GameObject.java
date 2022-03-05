@@ -10,9 +10,15 @@ public class GameObject {
     private String name;
     private List<Component> components = new ArrayList<>();
 
+    public Transform transform;
+
     public GameObject(String name) {
+        this(name, new Transform());
+    }
+
+    public GameObject(String name, Transform transform) {
         this.name = name;
-        System.out.println("'" + name + "' GameObject has been created.");
+        this.transform = transform;
     }
 
     public void start() {

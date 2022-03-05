@@ -63,6 +63,10 @@ public final class Window {
         static final Window window = new Window();
     }
 
+    public Scene getCurrentScene() {
+        return currentScene;
+    }
+
     public static Window get() {
         return WindowHolder.window;
     }
