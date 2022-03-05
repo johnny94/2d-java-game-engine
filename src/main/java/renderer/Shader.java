@@ -190,6 +190,11 @@ public final class Shader {
         glUniform1i(getUniformLocation(varName), val);
     }
 
+    public void setTexture(String varName, int slot) {
+        use();
+        glUniform1i(getUniformLocation(varName), slot);
+    }
+
     private int getUniformLocation(String varName) {
         return glGetUniformLocation(this.shaderProgramId, varName);
     }
