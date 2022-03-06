@@ -23,9 +23,13 @@ public class Renderer {
         boolean added = false;
         for (RenderBatch rb : renderBatchs) {
             if (rb.hasRoom()) {
-                rb.addSprite(renderer);
-                added = true;
-                break;
+                Optional<Texture> tex = renderer.getTexture();
+                if (!tex.isPresent() || rb.hasTexture(tex.get()) || rb.hasTextureRoom()) {
+                    rb.addSprite(renderer);
+                    added = true;
+                    break;
+                }
+
             }
         }
 

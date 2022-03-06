@@ -26,13 +26,13 @@ import org.lwjgl.BufferUtils;
 public class Texture {
 
     private String filepath;
-    private int texId;
+    private int texture;
 
     public Texture(String filepath) {
         this.filepath = filepath;
 
-        this.texId = glGenTextures();
-        glBindTexture(GL_TEXTURE_2D, this.texId);
+        this.texture = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, this.texture);
 
         // Set Texture parameters
         // Repeat image in both directions
@@ -70,7 +70,7 @@ public class Texture {
     }
 
     public void bind() {
-        glBindTexture(GL_TEXTURE_2D, this.texId);
+        glBindTexture(GL_TEXTURE_2D, this.texture);
     }
 
     public void unbind() {

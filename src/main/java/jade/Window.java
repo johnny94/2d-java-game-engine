@@ -13,6 +13,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_VISIBLE;
 import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
 import static org.lwjgl.glfw.GLFW.glfwDefaultWindowHints;
 import static org.lwjgl.glfw.GLFW.glfwDestroyWindow;
+import static org.lwjgl.glfw.GLFW.glfwGetTime;
 import static org.lwjgl.glfw.GLFW.glfwInit;
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
@@ -38,8 +39,6 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
-
-import util.Time;
 
 public final class Window {
     private static final MouseListener mouseListener = MouseListener.getInstance();
@@ -151,7 +150,7 @@ public final class Window {
     }
 
     private void loop() {
-        double beginTime = Time.getTime();
+        double beginTime = glfwGetTime();
         double endTime;
         double dt = -1.0;
 
@@ -168,9 +167,9 @@ public final class Window {
 
             glfwSwapBuffers(glfwWindow);
 
-            endTime = Time.getTime();
+            endTime = glfwGetTime();
             dt = endTime - beginTime;
-            beginTime = Time.getTime();
+            beginTime = endTime;
         }
     }
 }
