@@ -179,10 +179,10 @@ public class RenderBatch {
             }
 
             // Set position
-            vertices[offset] = spr.getGameObject().transform.position.x +
-                               (xAdd * spr.getGameObject().transform.scale.x);
-            vertices[offset + 1] = spr.getGameObject().transform.position.y +
-                               (yAdd * spr.getGameObject().transform.scale.y);
+            vertices[offset] = spr.gameObject.transform.position.x +
+                               (xAdd * spr.gameObject.transform.scale.x);
+            vertices[offset + 1] = spr.gameObject.transform.position.y +
+                               (yAdd * spr.gameObject.transform.scale.y);
 
             // Set color
             vertices[offset + 2] = color.x;
@@ -202,9 +202,20 @@ public class RenderBatch {
     }
 
     public void render() {
-        // For now, we will re-buffer all data every frame
-        glBindBuffer(GL_ARRAY_BUFFER, vboId);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
+        boolean rebufferData = false;
+        for (int i = 0; i < numSprites; i++) {
+            SpriteRenderer spr = spriteRenderers[i];
+            if (spr.isDirty()) {
+                loadVertexProperties(i);
+                spr.setClean();
+                rebufferData = true;
+            }
+        }
+
+        if (rebufferData) {
+            glBindBuffer(GL_ARRAY_BUFFER, vboId);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
+        }
 
         shader.use();
         shader.setMat4f("uProjection", Window.get().getCurrentScene().getCamera().getProjectionMatrix());

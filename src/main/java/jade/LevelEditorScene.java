@@ -8,6 +8,8 @@ import util.AssetPool;
 
 public class LevelEditorScene extends Scene {
 
+    private GameObject object1;
+
     @Override
     public void init() {
         loadResource();
@@ -16,15 +18,10 @@ public class LevelEditorScene extends Scene {
 
         SpriteSheet spriteSheet = AssetPool.getSpriteSheet("assets/images/spritesheet.png");
 
-        GameObject object1 = new GameObject("Obj1",
-                                            new Transform(new Vector2f(100, 100), new Vector2f(256, 256)));
+        object1 = new GameObject("Obj1",
+                                 new Transform(new Vector2f(100, 100), new Vector2f(256, 256)));
         object1.addComponent(new SpriteRenderer(spriteSheet.getSprite(0)));
         addGameObject(object1);
-
-        GameObject object2 = new GameObject("Obj2",
-                                            new Transform(new Vector2f(400, 100), new Vector2f(256, 256)));
-        object2.addComponent(new SpriteRenderer(spriteSheet.getSprite(1)));
-        addGameObject(object2);
     }
 
     private void loadResource() {
@@ -36,6 +33,9 @@ public class LevelEditorScene extends Scene {
 
     @Override
     public void update(double deltaTime) {
+        object1.transform.position.x += 10 * deltaTime;
+
+        // I think this should be moved to super class
         for (GameObject g : gameObjects) {
             g.update(deltaTime);
         }
