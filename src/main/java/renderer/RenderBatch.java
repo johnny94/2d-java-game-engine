@@ -22,6 +22,7 @@ import org.joml.Vector4f;
 
 import components.SpriteRenderer;
 import jade.Window;
+import util.AssetPool;
 
 public class RenderBatch {
     // Vertex Information
@@ -54,7 +55,7 @@ public class RenderBatch {
     public RenderBatch(int maxBatchSize) {
         this.maxBatchSize = maxBatchSize;
         this.spriteRenderers = new SpriteRenderer[maxBatchSize];
-        this.shader = new Shader("assets/shaders/default.glsl");
+        this.shader = AssetPool.loadShader("assets/shaders/default.glsl");
         this.shader.compile();
 
         this.vertices = new float[maxBatchSize * VERTEX_PER_QUAD * VERTEX_SIZE];

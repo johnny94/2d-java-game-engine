@@ -4,6 +4,7 @@ import org.joml.Vector2f;
 import org.joml.Vector4f;
 
 import components.SpriteRenderer;
+import util.AssetPool;
 
 public class LevelEditorScene extends Scene {
 
@@ -30,11 +31,16 @@ public class LevelEditorScene extends Scene {
                 this.addGameObject(go);
             }
         }
+
+        loadResource();
+    }
+
+    private void loadResource() {
+        AssetPool.loadShader("assets/shaders/default.glsl");
     }
 
     @Override
     public void update(double deltaTime) {
-        System.out.println("FPS: " + (1.0 / deltaTime));
         for (GameObject g : gameObjects) {
             g.update(deltaTime);
         }
