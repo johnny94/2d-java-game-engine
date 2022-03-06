@@ -1,6 +1,7 @@
 package renderer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,7 +23,7 @@ public class Renderer {
     private void add(SpriteRenderer renderer) {
         boolean added = false;
         for (RenderBatch rb : renderBatchs) {
-            if (rb.hasRoom()) {
+            if (rb.hasRoom() && rb.zIndex() == renderer.gameObject.zIndex()) {
                 Optional<Texture> tex = renderer.getTexture();
                 if (!tex.isPresent() || rb.hasTexture(tex.get()) || rb.hasTextureRoom()) {
                     rb.addSpriteRenderer(renderer);
@@ -34,11 +35,18 @@ public class Renderer {
         }
 
         if (!added) {
-            RenderBatch rb = new RenderBatch(MAX_BATCH_SIZE);
+            RenderBatch rb = new RenderBatch(MAX_BATCH_SIZE, renderer.gameObject.zIndex());
             rb.start();
             renderBatchs.add(rb);
             rb.addSpriteRenderer(renderer);
+            Collections.sort(renderBatchs);
         }
+
+        for (RenderBatch r : renderBatchs) {
+            System.out.print(r.zIndex());
+            System.out.print(" ");
+        }
+        System.out.println();
     }
 
     public void render() {

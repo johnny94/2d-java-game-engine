@@ -9,16 +9,18 @@ import components.Component;
 public class GameObject {
     private String name;
     private List<Component> components = new ArrayList<>();
+    private int zIndex;
 
     public Transform transform;
 
     public GameObject(String name) {
-        this(name, new Transform());
+        this(name, new Transform(), 0);
     }
 
-    public GameObject(String name, Transform transform) {
+    public GameObject(String name, Transform transform, int zIndex) {
         this.name = name;
         this.transform = transform;
+        this.zIndex = zIndex;
     }
 
     public void start() {
@@ -55,5 +57,9 @@ public class GameObject {
     public void addComponent(Component component) {
         this.components.add(component);
         component.setGameObject(this);
+    }
+
+    public int zIndex() {
+        return this.zIndex;
     }
 }

@@ -31,7 +31,7 @@ import components.SpriteRenderer;
 import jade.Window;
 import util.AssetPool;
 
-public class RenderBatch {
+public class RenderBatch implements Comparable<RenderBatch> {
     // Vertex Information
     // ======
     // Pos              Color                           tex coord      texIndex
@@ -68,10 +68,12 @@ public class RenderBatch {
     private int vaoId;
     private int vboId;
     private int maxBatchSize;
+    private int zIndex;
     private Shader shader;
 
-    public RenderBatch(int maxBatchSize) {
+    public RenderBatch(int maxBatchSize, int zIndex) {
         this.maxBatchSize = maxBatchSize;
+        this.zIndex = zIndex;
         this.spriteRenderers = new SpriteRenderer[maxBatchSize];
         this.textures = new ArrayList<>();
         this.shader = AssetPool.loadShader("assets/shaders/default.glsl");
@@ -277,5 +279,14 @@ public class RenderBatch {
         indices[offsetArrayIndex + 3] = offset;
         indices[offsetArrayIndex + 4] = offset + 2;
         indices[offsetArrayIndex + 5] = offset + 1;
+    }
+
+    public int zIndex() {
+        return this.zIndex;
+    }
+
+    @Override
+    public int compareTo(RenderBatch o) {
+        return Integer.compare(this.zIndex, o.zIndex);
     }
 }
