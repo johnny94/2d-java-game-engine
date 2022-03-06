@@ -28,6 +28,9 @@ public class Texture {
     private String filepath;
     private int texture;
 
+    private int width;
+    private int height;
+
     public Texture(String filepath) {
         this.filepath = filepath;
 
@@ -53,6 +56,9 @@ public class Texture {
         stbi_set_flip_vertically_on_load(false);
 
         if (image != null) {
+            this.width = width.get(0);
+            this.height = height.get(0);
+
             if (channels.get(0) == 3) {
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width.get(0), height.get(0), 0,
                              GL_RGB, GL_UNSIGNED_BYTE, image);
@@ -75,5 +81,13 @@ public class Texture {
 
     public void unbind() {
         glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    public int getWidth() {
+        return this.width;
+    }
+
+    public int getHeight() {
+        return this.height;
     }
 }

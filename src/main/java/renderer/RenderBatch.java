@@ -111,7 +111,7 @@ public class RenderBatch {
         glEnableVertexAttribArray(3);
     }
 
-    public void addSprite(SpriteRenderer spriteRenderer) {
+    public void addSpriteRenderer(SpriteRenderer spriteRenderer) {
         int index = this.numSprites;
         this.spriteRenderers[index] = spriteRenderer;
         this.numSprites++;

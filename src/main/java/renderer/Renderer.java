@@ -25,7 +25,7 @@ public class Renderer {
             if (rb.hasRoom()) {
                 Optional<Texture> tex = renderer.getTexture();
                 if (!tex.isPresent() || rb.hasTexture(tex.get()) || rb.hasTextureRoom()) {
-                    rb.addSprite(renderer);
+                    rb.addSpriteRenderer(renderer);
                     added = true;
                     break;
                 }
@@ -37,7 +37,7 @@ public class Renderer {
             RenderBatch rb = new RenderBatch(MAX_BATCH_SIZE);
             rb.start();
             renderBatchs.add(rb);
-            rb.addSprite(renderer);
+            rb.addSpriteRenderer(renderer);
         }
     }
 
