@@ -1,6 +1,7 @@
 package jade;
 
 import org.joml.Vector2f;
+import org.joml.Vector4f;
 
 import components.Sprite;
 import components.SpriteRenderer;
@@ -22,8 +23,9 @@ public class LevelEditorScene extends Scene {
         object1 = new GameObject("Obj1",
                                  new Transform(new Vector2f(100, 100), new Vector2f(256, 256)),
                                  -1);
-        object1.addComponent(new SpriteRenderer(new Sprite(AssetPool.loadTexture("assets/images/red.png"))));
+        object1.addComponent(new SpriteRenderer(new Vector4f(1.0f, 0.0f, 0.0f, 1.0f)));
         addGameObject(object1);
+        this.activeGameObject = object1;
 
         GameObject object2 = new GameObject("Obj2",
                                  new Transform(new Vector2f(100, 200), new Vector2f(256, 256)),

@@ -3,6 +3,7 @@ package jade;
 import java.util.ArrayList;
 import java.util.List;
 
+import imgui.ImGui;
 import renderer.Renderer;
 
 public abstract class Scene {
@@ -11,6 +12,7 @@ public abstract class Scene {
     protected Renderer renderer = new Renderer();
     protected Camera camera;
     protected final List<GameObject> gameObjects = new ArrayList<>();
+    protected GameObject activeGameObject = null;
 
     public void init() { }
 
@@ -38,5 +40,18 @@ public abstract class Scene {
 
     public Camera getCamera() {
         return this.camera;
+    }
+
+    // Note: I think this should be invoked by update
+    public void sceneImGui() {
+        if (activeGameObject != null) {
+            ImGui.begin("Inspector");
+            activeGameObject.imGui();
+            ImGui.end();
+        }
+    }
+
+    public void imGui() {
+
     }
 }

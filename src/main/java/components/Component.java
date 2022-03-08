@@ -11,4 +11,8 @@ public abstract class Component {
     public void setGameObject(GameObject gameObject) {
         this.gameObject = gameObject;
     }
+
+    // Note: Should this implement as an interface?
+    public void imGui() {
+    }
 }

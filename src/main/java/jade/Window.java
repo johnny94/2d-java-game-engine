@@ -47,9 +47,12 @@ import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
+import imgui.ImFontAtlas;
+import imgui.ImFontConfig;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.flag.ImGuiConfigFlags;
+import imgui.flag.ImGuiFreeTypeBuilderFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 
@@ -184,6 +187,19 @@ public final class Window {
         ImGui.createContext();
         ImGuiIO io = ImGui.getIO();
         io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
+
+        // Set fonts
+        ImFontAtlas imFontAtlas = io.getFonts();
+        ImFontConfig imFontConfig = new ImFontConfig();
+
+        imFontConfig.setPixelSnapH(true);
+        io.getFonts().addFontFromFileTTF("assets/fonts/NotoSans-Regular.ttf", 32,
+                                         imFontConfig, imFontAtlas.getGlyphRangesDefault());
+
+        imFontConfig.destroy();
+
+        imFontAtlas.setFlags(ImGuiFreeTypeBuilderFlags.LightHinting);
+        imFontAtlas.build();
     }
 
     private void loop() {
@@ -195,9 +211,12 @@ public final class Window {
             startFrame();
 
             imGuiLayer.imGui();
+
+            // NOTE: Maybe It will be better to merge update and sceneImGui method?
             if (dt > 0) {
                 currentScene.update(dt);
             }
+            currentScene.sceneImGui();
 
             endFrame();
 

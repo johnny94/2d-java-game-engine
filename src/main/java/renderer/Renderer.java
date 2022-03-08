@@ -41,12 +41,6 @@ public class Renderer {
             rb.addSpriteRenderer(renderer);
             Collections.sort(renderBatchs);
         }
-
-        for (RenderBatch r : renderBatchs) {
-            System.out.print(r.zIndex());
-            System.out.print(" ");
-        }
-        System.out.println();
     }
 
     public void render() {
