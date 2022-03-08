@@ -3,7 +3,7 @@ package components;
 import jade.GameObject;
 
 public abstract class Component {
-    public GameObject gameObject;
+    public transient GameObject gameObject;
 
     public void start() { }
     public abstract void update(double deltaTime);

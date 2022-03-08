@@ -10,14 +10,18 @@ import jade.Transform;
 import renderer.Texture;
 
 public class SpriteRenderer extends Component {
-    private final Vector4f color;
+    private Vector4f color;
     private Sprite sprite;
 
-    private Transform lastTransform;
-    private boolean isDirty;
+    private transient Transform lastTransform;
+    private transient boolean isDirty;
+
+    public SpriteRenderer() {
+        this(new Vector4f(1.0f, 1.0f, 1.0f, 1.0f), new Sprite());
+    }
 
     public SpriteRenderer(Vector4f color) {
-        this(color, new Sprite(null));
+        this(color, new Sprite());
     }
 
     public SpriteRenderer(Sprite sprite) {
@@ -41,7 +45,6 @@ public class SpriteRenderer extends Component {
             this.gameObject.transform.copy(lastTransform);
             this.isDirty = true;
         }
-
     }
 
     @Override

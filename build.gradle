@@ -5,10 +5,13 @@ plugins {
 group 'org.example'
 version '1.0-SNAPSHOT'
 
-project.ext.lwjglVersion = "3.3.1"
-project.ext.imguiVersion = "1.86.3"
-project.ext.jomlVersion = "1.10.4"
-project.ext.lwjglNatives = "natives-macos"
+ext {
+    lwjglVersion = "3.3.1"
+    imguiVersion = "1.86.3"
+    jomlVersion = "1.10.4"
+    lwjglNatives = "natives-macos"
+    gsonVersion = "2.9.0"
+}
 
 repositories {
     mavenCentral()
@@ -37,6 +40,9 @@ dependencies {
     runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
     implementation "org.joml:joml:${jomlVersion}"
+
+    // GSON
+    implementation "com.google.code.gson:gson:$gsonVersion"
 }
 
 test {
