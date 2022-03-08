@@ -6,6 +6,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
 import static org.lwjgl.glfw.GLFW.GLFW_MAXIMIZED;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE;
+import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_FORWARD_COMPAT;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_PROFILE;
 import static org.lwjgl.glfw.GLFW.GLFW_RESIZABLE;
 import static org.lwjgl.glfw.GLFW.GLFW_TRUE;
@@ -13,6 +14,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_VISIBLE;
 import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
 import static org.lwjgl.glfw.GLFW.glfwDefaultWindowHints;
 import static org.lwjgl.glfw.GLFW.glfwDestroyWindow;
+import static org.lwjgl.glfw.GLFW.glfwGetCurrentContext;
 import static org.lwjgl.glfw.GLFW.glfwGetTime;
 import static org.lwjgl.glfw.GLFW.glfwInit;
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
@@ -45,11 +47,17 @@ import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
+import imgui.ImGui;
+import imgui.ImGuiIO;
+import imgui.flag.ImGuiConfigFlags;
+import imgui.gl3.ImGuiImplGl3;
+import imgui.glfw.ImGuiImplGlfw;
+
 public final class Window {
     private static final MouseListener mouseListener = MouseListener.getInstance();
     private static final KeyListener keyListener = KeyListener.getInstance();
 
-    private long glfwWindow;
+    private long glfwWindowPtr;
 
     private final int width;
     private final int height;
@@ -57,14 +65,21 @@ public final class Window {
 
     private Scene currentScene;
 
-    private Window() {
+    // ImGui
+    private final ImGuiLayer imGuiLayer;
+    private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
+    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
+    private static final String GLSL_VERSION = "#version 330 core";
+
+    private Window(ImGuiLayer imGuiLayer) {
         this.width = 1920;
         this.height = 1080;
         this.title = "Mario";
+        this.imGuiLayer = imGuiLayer;
     }
 
     private static final class WindowHolder {
-        static final Window window = new Window();
+        static final Window window = new Window(new ImGuiLayer());
     }
 
     public Scene getCurrentScene() {
@@ -81,13 +96,7 @@ public final class Window {
         init();
         loop();
 
-        // Free the memory
-        glfwFreeCallbacks(glfwWindow);
-        glfwDestroyWindow(glfwWindow);
-
-        // Terminate GLFW and free the error callback
-        glfwTerminate();
-        glfwSetErrorCallback(null).free();
+        dispose();
     }
 
     public void changeScene(int index) {
@@ -107,6 +116,13 @@ public final class Window {
     }
 
     private void init() {
+        initWindow();
+        initImGui();
+        imGuiGlfw.init(glfwWindowPtr, true);
+        imGuiGl3.init(GLSL_VERSION);
+    }
+
+    private void initWindow() {
         GLFWErrorCallback.createPrint(System.err).set();
 
         if (!glfwInit()) {
@@ -115,32 +131,29 @@ public final class Window {
 
         glfwDefaultWindowHints();
 
-        // For MACOS
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        decideGlGlslVersions();
 
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
         glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
 
-        glfwWindow = glfwCreateWindow(this.width, this.height, this.title, NULL, NULL);
-        if (glfwWindow == NULL) {
+        glfwWindowPtr = glfwCreateWindow(this.width, this.height, this.title, NULL, NULL);
+        if (glfwWindowPtr == NULL) {
             throw new RuntimeException("Failed to create the GLFW window");
         }
 
         // Set callbacks
-        glfwSetCursorPosCallback(glfwWindow, mouseListener::mousePosCallback);
-        glfwSetMouseButtonCallback(glfwWindow, mouseListener::mouseButtonCallback);
-        glfwSetScrollCallback(glfwWindow, mouseListener::mouseScrollCallback);
-        glfwSetKeyCallback(glfwWindow, keyListener::keyCallback);
+        glfwSetCursorPosCallback(glfwWindowPtr, mouseListener::mousePosCallback);
+        glfwSetMouseButtonCallback(glfwWindowPtr, mouseListener::mouseButtonCallback);
+        glfwSetScrollCallback(glfwWindowPtr, mouseListener::mouseScrollCallback);
+        glfwSetKeyCallback(glfwWindowPtr, keyListener::keyCallback);
 
         // Make the OpenGL context current
-        glfwMakeContextCurrent(glfwWindow);
+        glfwMakeContextCurrent(glfwWindowPtr);
         // Enable v-sync
         glfwSwapInterval(1);
 
-        glfwShowWindow(glfwWindow);
+        glfwShowWindow(glfwWindowPtr);
 
         // This line is critical for LWJGL's interoperation with GLFW's
         // OpenGL context, or any context that is managed externally.
@@ -158,27 +171,84 @@ public final class Window {
         get().changeScene(0);
     }
 
+    private void decideGlGlslVersions() {
+        // We will use "#version 330 core" in the shader so the version is 3.3
+        // Ref https://en.wikipedia.org/wiki/OpenGL_Shading_Language
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE); // Required for Mac
+    }
+
+    private void initImGui() {
+        ImGui.createContext();
+        ImGuiIO io = ImGui.getIO();
+        io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
+    }
+
     private void loop() {
         double beginTime = glfwGetTime();
         double endTime;
         double dt = -1.0;
 
-        while(!glfwWindowShouldClose(glfwWindow)) {
-            // Poll events
-            glfwPollEvents();
+        while(!glfwWindowShouldClose(glfwWindowPtr)) {
+            startFrame();
 
-            glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
-
+            imGuiLayer.imGui();
             if (dt > 0) {
                 currentScene.update(dt);
             }
 
-            glfwSwapBuffers(glfwWindow);
+            endFrame();
 
             endTime = glfwGetTime();
             dt = endTime - beginTime;
             beginTime = endTime;
         }
+    }
+
+    private void startFrame() {
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        // ImGui Start frame
+        imGuiGlfw.newFrame();
+        ImGui.newFrame();
+    }
+
+    private void endFrame() {
+        ImGui.render();
+        imGuiGl3.renderDrawData(ImGui.getDrawData());
+
+        if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
+            final long backupWindowPtr = glfwGetCurrentContext();
+            ImGui.updatePlatformWindows();
+            ImGui.renderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backupWindowPtr);
+        }
+
+        glfwSwapBuffers(glfwWindowPtr);
+        glfwPollEvents();
+    }
+
+    private void dispose() {
+        imGuiGl3.dispose();
+        imGuiGlfw.dispose();
+        disposeImGui();
+        disposeWindow();
+    }
+
+    private void disposeWindow() {
+        // Free the memory
+        glfwFreeCallbacks(glfwWindowPtr);
+        glfwDestroyWindow(glfwWindowPtr);
+
+        // Terminate GLFW and free the error callback
+        glfwTerminate();
+        glfwSetErrorCallback(null).free();
+    }
+
+    private void disposeImGui() {
+        ImGui.destroyContext();
     }
 }
