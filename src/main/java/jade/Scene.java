@@ -1,10 +1,15 @@
 package jade;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 import imgui.ImGui;
 import renderer.Renderer;
+import util.GsonUtils;
 
 public abstract class Scene {
     private boolean isRunning;
@@ -13,6 +18,7 @@ public abstract class Scene {
     protected Camera camera;
     protected final List<GameObject> gameObjects = new ArrayList<>();
     protected GameObject activeGameObject = null;
+    protected boolean levelLoaded;
 
     public void init() { }
 
@@ -53,5 +59,31 @@ public abstract class Scene {
 
     public void imGui() {
 
+    }
+
+    public void saveExit() {
+        try(FileWriter writer = new FileWriter("level.json")) {
+            writer.write(GsonUtils.DEFAULT_GSON.toJson(this.gameObjects));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void load() {
+        String level = "";
+        try {
+            level = new String(Files.readAllBytes(Paths.get("level.json")));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (!level.isEmpty()) {
+            GameObject[] objs = GsonUtils.DEFAULT_GSON.fromJson(level, GameObject[].class);
+            this.gameObjects.clear();
+            for (GameObject obj : objs) {
+                addGameObject(obj);
+            }
+            levelLoaded = true;
+        }
     }
 }

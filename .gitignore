@@ -93,3 +93,6 @@ gradle-app.setting
 
 # imgui
 imgui.ini
+
+# saved file
+*.json

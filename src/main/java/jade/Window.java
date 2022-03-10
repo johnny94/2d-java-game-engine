@@ -207,6 +207,7 @@ public final class Window {
         double endTime;
         double dt = -1.0;
 
+        currentScene.load();
         while(!glfwWindowShouldClose(glfwWindowPtr)) {
             startFrame();
 
@@ -224,6 +225,8 @@ public final class Window {
             dt = endTime - beginTime;
             beginTime = endTime;
         }
+
+        currentScene.saveExit();
     }
 
     private void startFrame() {
