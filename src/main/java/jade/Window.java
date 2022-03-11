@@ -114,6 +114,7 @@ public final class Window {
                 assert false : "Unknown scene '" + index + "'";
         }
 
+        currentScene.load();
         currentScene.init();
         currentScene.start();
     }
@@ -207,7 +208,6 @@ public final class Window {
         double endTime;
         double dt = -1.0;
 
-        currentScene.load();
         while(!glfwWindowShouldClose(glfwWindowPtr)) {
             startFrame();
 
