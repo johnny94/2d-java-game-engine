@@ -90,4 +90,8 @@ public class Texture {
     public int getHeight() {
         return this.height;
     }
+
+    public int getTextureId() {
+        return this.texture;
+    }
 }

@@ -4,6 +4,8 @@ import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LAST;
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 
+import org.joml.Vector4f;
+
 public final class MouseListener {
     private static final class InstanceHolder {
         static final MouseListener instance = new MouseListener();
@@ -60,6 +62,34 @@ public final class MouseListener {
 
     public float getX() {
         return (float)xPos;
+    }
+
+    public float getOrthoX() {
+        float currentX = getX();
+
+        // Convert to NDC
+        currentX = (currentX / Window.get().getWidth()) * 2.0f - 1.0f;
+
+        Vector4f tmp = new Vector4f(currentX, 0, 0, 1);
+        Camera c = Window.get().getCurrentScene().getCamera();
+        tmp.mul(c.getInverseProjectionMatrix())
+           .mul(c.getInverseViewMatrix());
+
+        return tmp.x;
+    }
+
+    public float getOrthoY() {
+        float currentY = getY();
+
+        // Convert to NDC
+        currentY = (currentY / Window.get().getHeight()) * 2.0f - 1.0f;
+
+        Vector4f tmp = new Vector4f(0, currentY, 0, 1);
+        Camera c = Window.get().getCurrentScene().getCamera();
+        tmp.mul(c.getInverseProjectionMatrix())
+           .mul(c.getInverseViewMatrix());
+
+        return tmp.y;
     }
 
     public float getY() {

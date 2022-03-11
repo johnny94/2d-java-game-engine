@@ -93,6 +93,14 @@ public final class Window {
         return WindowHolder.window;
     }
 
+    public int getWidth() {
+        return this.width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
     public void run() {
         System.out.println("Hello LWJGL " + Version.getVersion() + '!');
 
@@ -194,7 +202,7 @@ public final class Window {
         ImFontConfig imFontConfig = new ImFontConfig();
 
         imFontConfig.setPixelSnapH(true);
-        io.getFonts().addFontFromFileTTF("assets/fonts/NotoSans-Regular.ttf", 32,
+        io.getFonts().addFontFromFileTTF("assets/fonts/NotoSans-Regular.ttf", 24,
                                          imFontConfig, imFontAtlas.getGlyphRangesDefault());
 
         imFontConfig.destroy();

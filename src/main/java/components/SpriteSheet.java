@@ -31,7 +31,7 @@ public class SpriteSheet {
                     new Vector2f(leftX, topY),
             };
 
-            this.sprites.add(new Sprite(texture, texCoords));
+            this.sprites.add(new Sprite(texture, spriteWidth, spriteHeight, texCoords));
 
             currentX += spriteWidth + spacing;
             if (currentX >= texture.getWidth()) {
@@ -43,5 +43,9 @@ public class SpriteSheet {
 
     public Sprite getSprite(int index) {
         return this.sprites.get(index);
+    }
+
+    public int numSprite() {
+        return sprites.size();
     }
 }
