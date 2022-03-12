@@ -7,6 +7,9 @@ import java.util.Optional;
 import components.Component;
 
 public class GameObject {
+    private static int ID_COUNTER;
+    private int uid = -1;
+
     private String name;
     private List<Component> components = new ArrayList<>();
     private int zIndex;
@@ -21,6 +24,13 @@ public class GameObject {
         this.name = name;
         this.transform = transform;
         this.zIndex = zIndex;
+
+        this.uid = ID_COUNTER;
+        ID_COUNTER++;
+    }
+
+    public static void init(int maxId) {
+        ID_COUNTER = maxId;
     }
 
     public void start() {
@@ -55,6 +65,7 @@ public class GameObject {
     }
 
     public void addComponent(Component component) {
+        component.generateId();
         this.components.add(component);
         component.setGameObject(this);
     }
@@ -67,5 +78,13 @@ public class GameObject {
 
     public int zIndex() {
         return this.zIndex;
+    }
+
+    public int getUid() {
+        return this.uid;
+    }
+
+    public List<Component> getComponents() {
+        return this.components;
     }
 }

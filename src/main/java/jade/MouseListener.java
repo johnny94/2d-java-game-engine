@@ -79,7 +79,8 @@ public final class MouseListener {
     }
 
     public float getOrthoY() {
-        float currentY = getY();
+        // Y coordinate need to be flip
+        float currentY = Window.get().getHeight() - getY();
 
         // Convert to NDC
         currentY = (currentY / Window.get().getHeight()) * 2.0f - 1.0f;

@@ -1,20 +1,27 @@
-package jade;
+package scenes;
 
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 
+import components.MouseControls;
 import components.RigidBody;
 import components.Sprite;
 import components.SpriteRenderer;
 import components.SpriteSheet;
 import imgui.ImGui;
 import imgui.ImVec2;
+import jade.Camera;
+import jade.GameObject;
+import jade.Prefabs;
+import jade.Transform;
 import util.AssetPool;
 
 public class LevelEditorScene extends Scene {
 
     private GameObject object1;
     private SpriteSheet spriteSheet;
+
+    private MouseControls mouseControls = new MouseControls();
 
     @Override
     public void init() {
@@ -25,8 +32,6 @@ public class LevelEditorScene extends Scene {
             this.activeGameObject = this.gameObjects.get(0);
             return;
         }
-
-
 
         object1 = new GameObject("Obj1",
                                  new Transform(new Vector2f(100, 100), new Vector2f(256, 256)),
@@ -55,6 +60,10 @@ public class LevelEditorScene extends Scene {
 
     @Override
     public void update(double deltaTime) {
+
+        // Special component that responsible for drag game objects
+        mouseControls.update(deltaTime);
+
         // I think this should be moved to super class
         for (GameObject g : gameObjects) {
             g.update(deltaTime);
@@ -83,7 +92,8 @@ public class LevelEditorScene extends Scene {
             if (ImGui.imageButton(texId, widgetWidth, widgetHeight,
                                   texCoords[0].x, texCoords[0].y,
                                   texCoords[2].x, texCoords[2].y)) {
-                System.out.println("Button " + i + " clicked");
+                GameObject go = Prefabs.generateSpriteObject(sprite, widgetWidth, widgetHeight);
+                mouseControls.pickUpObject(go);
             }
             ImGui.popID();
 

@@ -1,6 +1,9 @@
-package jade;
+package scenes;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
+
+import jade.KeyListener;
+import jade.Window;
 
 public class LevelScene extends Scene {
     public LevelScene() {

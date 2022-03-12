@@ -1,13 +1,17 @@
-package jade;
+package scenes;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import components.Component;
 import imgui.ImGui;
+import jade.Camera;
+import jade.GameObject;
 import renderer.Renderer;
 import util.GsonUtils;
 
@@ -72,19 +76,44 @@ public abstract class Scene {
     }
 
     public void load() {
+        Path p = Paths.get("level.json");
+        if (!p.toFile().exists()) {
+            System.out.println("Not found level.json. Create empty scene.");
+            return;
+        }
+
         String level = "";
         try {
             level = new String(Files.readAllBytes(Paths.get("level.json")));
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to open level.json", e);
         }
 
         if (!level.isEmpty()) {
+            int maxGameObjectId = Integer.MIN_VALUE;
+            int maxComponentId = Integer.MIN_VALUE;
+
             GameObject[] objs = GsonUtils.DEFAULT_GSON.fromJson(level, GameObject[].class);
             this.gameObjects.clear();
             for (GameObject obj : objs) {
                 addGameObject(obj);
+
+                for (Component c : obj.getComponents()) {
+                    if (c.getUid() > maxComponentId) {
+                        maxComponentId = c.getUid();
+                    }
+                }
+
+                if (obj.getUid() > maxGameObjectId) {
+                    maxGameObjectId = obj.getUid();
+                }
             }
+
+            maxGameObjectId++;
+            maxComponentId++;
+
+            GameObject.init(maxGameObjectId);
+            Component.init(maxComponentId);
             levelLoaded = true;
         }
     }

@@ -24,6 +24,7 @@ import static org.lwjgl.glfw.GLFW.glfwSetErrorCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetScrollCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetWindowSizeCallback;
 import static org.lwjgl.glfw.GLFW.glfwShowWindow;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 import static org.lwjgl.glfw.GLFW.glfwSwapInterval;
@@ -55,6 +56,9 @@ import imgui.flag.ImGuiConfigFlags;
 import imgui.flag.ImGuiFreeTypeBuilderFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
+import scenes.LevelEditorScene;
+import scenes.LevelScene;
+import scenes.Scene;
 
 public final class Window {
     private static final MouseListener mouseListener = MouseListener.getInstance();
@@ -62,8 +66,8 @@ public final class Window {
 
     private long glfwWindowPtr;
 
-    private final int width;
-    private final int height;
+    private int width;
+    private int height;
     private final String title;
 
     private Scene currentScene;
@@ -159,6 +163,10 @@ public final class Window {
         glfwSetMouseButtonCallback(glfwWindowPtr, mouseListener::mouseButtonCallback);
         glfwSetScrollCallback(glfwWindowPtr, mouseListener::mouseScrollCallback);
         glfwSetKeyCallback(glfwWindowPtr, keyListener::keyCallback);
+        glfwSetWindowSizeCallback(glfwWindowPtr, (window, width, height) -> {
+            this.width = width;
+            this.height = height;
+        });
 
         // Make the OpenGL context current
         glfwMakeContextCurrent(glfwWindowPtr);

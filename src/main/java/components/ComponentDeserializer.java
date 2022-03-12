@@ -1,4 +1,4 @@
-package jade;
+package components;
 
 import java.lang.reflect.Type;
 
@@ -10,8 +10,6 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-
-import components.Component;
 
 public class ComponentDeserializer implements JsonSerializer<Component>, JsonDeserializer<Component> {
     @Override

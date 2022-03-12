@@ -3,7 +3,7 @@ package util;
 import com.google.gson.Gson;
 
 import components.Component;
-import jade.ComponentDeserializer;
+import components.ComponentDeserializer;
 import jade.GameObject;
 import jade.GameObjectDeserializer;
 

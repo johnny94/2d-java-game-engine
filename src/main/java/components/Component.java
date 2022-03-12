@@ -10,6 +10,9 @@ import imgui.ImGui;
 import jade.GameObject;
 
 public abstract class Component {
+    private static int ID_COUNTER;
+    private int uid = -1;
+
     public transient GameObject gameObject;
 
     public void start() { }
@@ -76,5 +79,20 @@ public abstract class Component {
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
+    }
+
+    public void generateId() {
+        if (this.uid == -1) {
+            this.uid = ID_COUNTER;
+            ID_COUNTER++;
+        }
+    }
+
+    public int getUid() {
+        return this.uid;
+    }
+
+    public static void init(int maxId) {
+        ID_COUNTER = maxId;
     }
 }
