@@ -1,13 +1,11 @@
 package scenes;
 
 import org.joml.Vector2f;
-import org.joml.Vector4f;
+import org.joml.Vector3f;
 
 import components.GridLines;
 import components.MouseControls;
-import components.RigidBody;
 import components.Sprite;
-import components.SpriteRenderer;
 import components.SpriteSheet;
 import imgui.ImGui;
 import imgui.ImVec2;
@@ -15,6 +13,7 @@ import jade.Camera;
 import jade.GameObject;
 import jade.Prefabs;
 import jade.Transform;
+import renderer.DebugDraw;
 import util.AssetPool;
 import util.Settings;
 
@@ -34,14 +33,14 @@ public class LevelEditorScene extends Scene {
         levelEditorObject.addComponent(new GridLines());
 
         loadResource();
-        this.camera = new Camera(new Vector2f(-250, 0));
+        this.camera = new Camera(new Vector2f(0, 0));
         spriteSheet = AssetPool.getSpriteSheet("assets/images/spritesheets/decorationsAndBlocks.png");
         if (levelLoaded) {
             this.activeGameObject = this.gameObjects.get(0);
             return;
         }
 
-        object1 = new GameObject("Obj1",
+        /*object1 = new GameObject("Obj1",
                                  new Transform(new Vector2f(100, 100), new Vector2f(256, 256)),
                                  -1);
         object1.addComponent(new SpriteRenderer(new Vector4f(1.0f, 0.0f, 0.0f, 1.0f)));
@@ -54,7 +53,7 @@ public class LevelEditorScene extends Scene {
                                             -2);
         object2.addComponent(new SpriteRenderer(new Sprite(AssetPool.loadTexture("assets/images/green.png"),
                                                            256,  256)));
-        addGameObject(object2);
+        addGameObject(object2);*/
     }
 
     private void loadResource() {
@@ -69,6 +68,10 @@ public class LevelEditorScene extends Scene {
     @Override
     public void update(double deltaTime) {
         levelEditorObject.update(deltaTime);
+
+        DebugDraw.drawBox(new Vector2f(200, 200), new Vector2f(64, 24), 30.0f,
+                          new Vector3f(0,1,0), 1);
+        DebugDraw.drawCircle(new Vector2f(300, 300), 64, new Vector3f(1,0,0), 1);
 
         // I think this should be moved to super class
         for (GameObject g : gameObjects) {

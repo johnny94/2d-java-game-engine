@@ -26,6 +26,7 @@ import org.joml.Vector3f;
 
 import jade.Window;
 import util.AssetPool;
+import util.JMath;
 
 public final class DebugDraw {
     private static final int MAX_LINE = 500;
@@ -160,5 +161,67 @@ public final class DebugDraw {
         }
 
         lines.add(new Line2D(from, to, color, lifeTime));
+    }
+
+    // =========================
+    // 2D Box
+    // =========================
+    public static void drawBox(Vector2f center, Vector2f dimensions, float rotation) {
+        drawBox(center, dimensions, rotation, new Vector3f(0.0f, 1.0f, 0.0f));
+    }
+
+    public static void drawBox(Vector2f center, Vector2f dimensions, float rotation, Vector3f color) {
+        drawBox(center, dimensions, rotation, color, 1);
+    }
+
+    public static void drawBox(Vector2f center, Vector2f dimensions, float rotation, Vector3f color, int lifeTime) {
+        Vector2f bottomLeft = new Vector2f(center).sub(dimensions.x / 2.0f, dimensions.y / 2.0f);
+        Vector2f topRight = new Vector2f(center).add(dimensions.x / 2.0f, dimensions.y / 2.0f);
+
+        Vector2f[] vertices = {
+                new Vector2f(bottomLeft.x, bottomLeft.y), new Vector2f(bottomLeft.x, topRight.y),
+                new Vector2f(topRight.x, topRight.y), new Vector2f(topRight.x, bottomLeft.y)
+        };
+
+        if (rotation != 0.0f) {
+            for(Vector2f v : vertices) {
+                JMath.rotate(v, rotation, center);
+            }
+        }
+
+        drawLine(vertices[0], vertices[1], color, lifeTime);
+        drawLine(vertices[0], vertices[3], color, lifeTime);
+        drawLine(vertices[1], vertices[2], color, lifeTime);
+        drawLine(vertices[2], vertices[3], color, lifeTime);
+    }
+
+    // =========================
+    // Circle
+    // =========================
+    public static void drawCircle(Vector2f center, float radius) {
+        drawCircle(center, radius, new Vector3f(0, 1, 0));
+    }
+
+    public static void drawCircle(Vector2f center, float radius, Vector3f color) {
+        drawCircle(center, radius, color, 1);
+    }
+
+    public static void drawCircle(Vector2f center, float radius, Vector3f color, int lifeTime) {
+        Vector2f[] points = new Vector2f[20];
+        int increment = 360 / points.length;
+        int currentAngle = 0;
+
+        for (int i = 0; i < points.length; i++) {
+            Vector2f tmp = new Vector2f(radius, 0);
+            JMath.rotate(tmp, currentAngle, new Vector2f());
+            points[i] = new Vector2f(tmp).add(center);
+
+            if (i > 0) {
+                drawLine(points[i - 1], points[i], color, lifeTime);
+            }
+            currentAngle += increment;
+        }
+
+        drawLine(points[points.length - 1], points[0], color, lifeTime);
     }
 }
