@@ -5,6 +5,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 import jade.GameObject;
 import jade.MouseListener;
 import jade.Window;
+import util.Settings;
 
 public class MouseControls extends Component {
     private static final MouseListener mouseListener = MouseListener.getInstance();
@@ -22,8 +23,11 @@ public class MouseControls extends Component {
     @Override
     public void update(double deltaTime) {
         if (this.holdingObject != null) {
-            holdingObject.transform.position.x = mouseListener.getOrthoX() - 16;
-            holdingObject.transform.position.y = mouseListener.getOrthoY() - 16;
+            holdingObject.transform.position.x = (int)(mouseListener.getOrthoX() / Settings.GRID_WIDTH) *
+                                                 Settings.GRID_WIDTH;
+            holdingObject.transform.position.y = (int)(mouseListener.getOrthoY() / Settings.GRID_HEIGHT)*
+                                                 Settings.GRID_HEIGHT;
+
             if (mouseListener.isPressed(GLFW_MOUSE_BUTTON_LEFT)) {
                 place();
             }

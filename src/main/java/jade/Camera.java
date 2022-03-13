@@ -5,6 +5,8 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 public class Camera {
+    private static final Vector2f projectionSize = new Vector2f(32.0f * 40.0f, 32.0f * 21.0f);
+
     public Vector2f position;
 
     private Matrix4f projectionMatrix = new Matrix4f();
@@ -20,7 +22,7 @@ public class Camera {
 
     public void adjustProjection() {
         projectionMatrix.identity();
-        projectionMatrix.ortho(0, 32.0f * 40.0f, 0, 32.0f * 21.0f,
+        projectionMatrix.ortho(0, projectionSize.x, 0, projectionSize.y,
                                0.0f, 100.0f);
         projectionMatrix.invert(inverseProjectionMatrix);
     }
@@ -48,5 +50,9 @@ public class Camera {
 
     public Matrix4f getInverseViewMatrix() {
         return inverseViewMatrix;
+    }
+
+    public Vector2f getProjectionSize() {
+        return projectionSize;
     }
 }

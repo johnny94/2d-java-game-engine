@@ -1,9 +1,9 @@
 package scenes;
 
 import org.joml.Vector2f;
-import org.joml.Vector3f;
 import org.joml.Vector4f;
 
+import components.GridLines;
 import components.MouseControls;
 import components.RigidBody;
 import components.Sprite;
@@ -15,22 +15,26 @@ import jade.Camera;
 import jade.GameObject;
 import jade.Prefabs;
 import jade.Transform;
-import renderer.DebugDraw;
 import util.AssetPool;
+import util.Settings;
 
 public class LevelEditorScene extends Scene {
 
     private GameObject object1;
     private SpriteSheet spriteSheet;
 
-    private MouseControls mouseControls = new MouseControls();
+    // Special Object that will not be added to and gameObject list (we don't want this to be serialized)
+    // Note: Maybe we can find a way to organize this kind of special object.
+    private GameObject levelEditorObject = new GameObject("LevelEditor",
+                                                          new Transform(new Vector2f(), new Vector2f()), 0);
 
     @Override
     public void init() {
+        levelEditorObject.addComponent(new MouseControls());
+        levelEditorObject.addComponent(new GridLines());
+
         loadResource();
         this.camera = new Camera(new Vector2f(-250, 0));
-        DebugDraw.drawLine(new Vector2f(0, 0), new Vector2f(800, 800),
-                           new Vector3f(1, 0, 0), 120);
         spriteSheet = AssetPool.getSpriteSheet("assets/images/spritesheets/decorationsAndBlocks.png");
         if (levelLoaded) {
             this.activeGameObject = this.gameObjects.get(0);
@@ -64,9 +68,7 @@ public class LevelEditorScene extends Scene {
 
     @Override
     public void update(double deltaTime) {
-
-        // Special component that responsible for drag game objects
-        mouseControls.update(deltaTime);
+        levelEditorObject.update(deltaTime);
 
         // I think this should be moved to super class
         for (GameObject g : gameObjects) {
@@ -94,10 +96,11 @@ public class LevelEditorScene extends Scene {
 
             ImGui.pushID(i);
             if (ImGui.imageButton(texId, widgetWidth, widgetHeight,
-                                  texCoords[0].x, texCoords[0].y,
-                                  texCoords[2].x, texCoords[2].y)) {
-                GameObject go = Prefabs.generateSpriteObject(sprite, widgetWidth, widgetHeight);
-                mouseControls.pickUpObject(go);
+                                  texCoords[2].x, texCoords[0].y,
+                                  texCoords[0].x, texCoords[2].y)) {
+                GameObject go = Prefabs.generateSpriteObject(sprite, Settings.GRID_WIDTH, Settings.GRID_HEIGHT);
+                levelEditorObject.getComponent(MouseControls.class)
+                                 .ifPresent(m -> m.pickUpObject(go));
             }
             ImGui.popID();
 
