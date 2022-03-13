@@ -1,6 +1,7 @@
 package scenes;
 
 import org.joml.Vector2f;
+import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import components.MouseControls;
@@ -14,6 +15,7 @@ import jade.Camera;
 import jade.GameObject;
 import jade.Prefabs;
 import jade.Transform;
+import renderer.DebugDraw;
 import util.AssetPool;
 
 public class LevelEditorScene extends Scene {
@@ -27,6 +29,8 @@ public class LevelEditorScene extends Scene {
     public void init() {
         loadResource();
         this.camera = new Camera(new Vector2f(-250, 0));
+        DebugDraw.drawLine(new Vector2f(0, 0), new Vector2f(800, 800),
+                           new Vector3f(1, 0, 0), 120);
         spriteSheet = AssetPool.getSpriteSheet("assets/images/spritesheets/decorationsAndBlocks.png");
         if (levelLoaded) {
             this.activeGameObject = this.gameObjects.get(0);

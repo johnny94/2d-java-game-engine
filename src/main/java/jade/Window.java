@@ -56,6 +56,7 @@ import imgui.flag.ImGuiConfigFlags;
 import imgui.flag.ImGuiFreeTypeBuilderFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
+import renderer.DebugDraw;
 import scenes.LevelEditorScene;
 import scenes.LevelScene;
 import scenes.Scene;
@@ -231,6 +232,7 @@ public final class Window {
 
             // NOTE: Maybe It will be better to merge update and sceneImGui method?
             if (dt > 0) {
+                DebugDraw.draw();
                 currentScene.update(dt);
             }
             currentScene.sceneImGui();
