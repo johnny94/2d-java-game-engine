@@ -155,8 +155,7 @@ public class RenderBatch implements Comparable<RenderBatch> {
         if (spr.getTexture().isPresent()) {
             Texture t = spr.getTexture().get();
             for (int i = 0; i < textures.size(); i++) {
-                // TODO: Don't use == to compare two objects
-                if (textures.get(i) == t) {
+                if (textures.get(i).equals(t)) {
                     slotIndex = i;
                     break;
                 }

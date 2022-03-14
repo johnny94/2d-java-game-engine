@@ -26,7 +26,7 @@ import org.lwjgl.BufferUtils;
 public class Texture {
 
     private String filepath;
-    private int texture;
+    private int textureId;
 
     private int width;
     private int height;
@@ -34,8 +34,8 @@ public class Texture {
     public void init(String filepath) {
         this.filepath = filepath;
 
-        this.texture = glGenTextures();
-        glBindTexture(GL_TEXTURE_2D, this.texture);
+        this.textureId = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, this.textureId);
 
         // Set Texture parameters
         // Repeat image in both directions
@@ -76,7 +76,7 @@ public class Texture {
     }
 
     public void bind() {
-        glBindTexture(GL_TEXTURE_2D, this.texture);
+        glBindTexture(GL_TEXTURE_2D, this.textureId);
     }
 
     public void unbind() {
@@ -92,6 +92,21 @@ public class Texture {
     }
 
     public int getTextureId() {
-        return this.texture;
+        return this.textureId;
+    }
+
+    public String getFilepath() {
+        return this.filepath;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) return false;
+        if (!(o instanceof Texture)) return false;
+
+        Texture oTex = (Texture) o;
+        return oTex.getWidth() == this.width && oTex.getHeight() == this.height &&
+               oTex.getTextureId() == this.textureId &&
+               oTex.getFilepath().equals(this.getFilepath());
     }
 }
