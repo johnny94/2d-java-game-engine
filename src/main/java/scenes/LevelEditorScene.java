@@ -6,6 +6,7 @@ import org.joml.Vector3f;
 import components.GridLines;
 import components.MouseControls;
 import components.Sprite;
+import components.SpriteRenderer;
 import components.SpriteSheet;
 import imgui.ImGui;
 import imgui.ImVec2;
@@ -36,7 +37,9 @@ public class LevelEditorScene extends Scene {
         this.camera = new Camera(new Vector2f(0, 0));
         spriteSheet = AssetPool.getSpriteSheet("assets/images/spritesheets/decorationsAndBlocks.png");
         if (levelLoaded) {
-            this.activeGameObject = this.gameObjects.get(0);
+            if (!gameObjects.isEmpty()) {
+                this.activeGameObject = this.gameObjects.get(0);
+            }
             return;
         }
 
@@ -63,6 +66,17 @@ public class LevelEditorScene extends Scene {
                                   new SpriteSheet(AssetPool.loadTexture("assets/images/spritesheets/decorationsAndBlocks.png"),
                                                   16, 16, 81, 0));
         AssetPool.loadTexture("assets/images/green.png");
+
+        // Note: I think this should be done when deserialize the Texture.
+        for(GameObject go : gameObjects) {
+            go.getComponent(SpriteRenderer.class)
+              .ifPresent(spr -> {
+                  if (spr.getTexture().isPresent()) {
+                      String texturePath = spr.getTexture().get().getFilepath();
+                      spr.setTexture(AssetPool.loadTexture(texturePath));
+                  }
+              });
+        }
     }
 
     @Override

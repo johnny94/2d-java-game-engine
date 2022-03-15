@@ -57,6 +57,7 @@ import imgui.flag.ImGuiFreeTypeBuilderFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import renderer.DebugDraw;
+import renderer.Framebuffer;
 import scenes.LevelEditorScene;
 import scenes.LevelScene;
 import scenes.Scene;
@@ -72,6 +73,8 @@ public final class Window {
     private final String title;
 
     private Scene currentScene;
+
+    private Framebuffer framebuffer;
 
     // ImGui
     private final ImGuiLayer imGuiLayer;
@@ -189,6 +192,7 @@ public final class Window {
         System.err.println("OpenGL version: " + glGetString(GL_VERSION));
         System.err.println("Device: " + glGetString(GL_RENDERER));
 
+        framebuffer = new Framebuffer(3840, 2160);
         get().changeScene(0);
     }
 
@@ -228,13 +232,15 @@ public final class Window {
         while(!glfwWindowShouldClose(glfwWindowPtr)) {
             startFrame();
 
-            imGuiLayer.imGui();
-
+            //framebuffer.bind();
             // NOTE: Maybe It will be better to merge update and sceneImGui method?
             if (dt > 0) {
                 DebugDraw.draw();
                 currentScene.update(dt);
             }
+            framebuffer.unBind();
+
+            imGuiLayer.imGui();
             currentScene.sceneImGui();
 
             endFrame();

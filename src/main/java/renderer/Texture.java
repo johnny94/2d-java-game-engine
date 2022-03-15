@@ -26,10 +26,26 @@ import org.lwjgl.BufferUtils;
 public class Texture {
 
     private String filepath;
-    private int textureId;
+    private transient int textureId;
 
     private int width;
     private int height;
+
+    public static Texture createEmptyTexture(int width, int height) {
+        // Note. There should be a better way to implement this.
+        Texture t = new Texture();
+        t.width = width;
+        t.height = height;
+        t.filepath = "Generated";
+
+        t.textureId = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, t.textureId);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,
+                     GL_RGB, GL_UNSIGNED_BYTE, 0);
+
+        return t;
+    }
 
     public void init(String filepath) {
         this.filepath = filepath;
