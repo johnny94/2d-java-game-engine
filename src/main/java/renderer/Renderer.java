@@ -12,6 +12,9 @@ public class Renderer {
     private static final int MAX_BATCH_SIZE = 1000;
     private final List<RenderBatch> renderBatchs = new ArrayList<>();
 
+    // This is a global state
+    private static Shader currentShader;
+
     // TODO: Maybe SpriteRenderer will be better
     public void add(GameObject gameObject) {
         Optional<SpriteRenderer> spr = gameObject.getComponent(SpriteRenderer.class);
@@ -43,7 +46,16 @@ public class Renderer {
         }
     }
 
+    public static void bindShader(Shader shader) {
+        currentShader = shader;
+    }
+
+    public static Shader getBoundShader() {
+        return currentShader;
+    }
+
     public void render() {
+        currentShader.use();
         for(RenderBatch rb : renderBatchs) {
             rb.render();
         }

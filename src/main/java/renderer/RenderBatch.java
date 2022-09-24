@@ -29,7 +29,6 @@ import org.joml.Vector4f;
 
 import components.SpriteRenderer;
 import jade.Window;
-import util.AssetPool;
 
 public class RenderBatch implements Comparable<RenderBatch> {
     // Vertex Information
@@ -41,14 +40,17 @@ public class RenderBatch implements Comparable<RenderBatch> {
     private static final int COLOR_SIZE = 4;
     private static final int TEX_COORD_SIZE = 2;
     private static final int TEX_INDEX_SIZE = 1;
+    private static final int ENTITY_ID_INDEX_SIZE = 1;
 
     // In bytes
     private static final int POS_OFFSET = 0;
     private static final int COLOR_OFFSET = POS_OFFSET + POS_SIZE * Float.BYTES;
     private static final int TEX_COORD_OFFSET = COLOR_OFFSET + COLOR_SIZE * Float.BYTES;
     private static final int TEX_INDEX_OFFSET = TEX_COORD_OFFSET + TEX_COORD_SIZE * Float.BYTES;
+    private static final int ENTITY_ID_INDEX_OFFSET = TEX_INDEX_OFFSET + TEX_INDEX_SIZE * Float.BYTES;
 
-    private static final int VERTEX_SIZE = POS_SIZE + COLOR_SIZE + TEX_COORD_SIZE + TEX_INDEX_SIZE;
+    private static final int VERTEX_SIZE = POS_SIZE + COLOR_SIZE + TEX_COORD_SIZE +
+                                           TEX_INDEX_SIZE + ENTITY_ID_INDEX_SIZE;
     private static final int VERTEX_SIZE_BYTES = VERTEX_SIZE * Float.BYTES;
 
     private static final int VERTEX_PER_QUAD = 4;
@@ -69,16 +71,12 @@ public class RenderBatch implements Comparable<RenderBatch> {
     private int vboId;
     private int maxBatchSize;
     private int zIndex;
-    private Shader shader;
 
     public RenderBatch(int maxBatchSize, int zIndex) {
         this.maxBatchSize = maxBatchSize;
         this.zIndex = zIndex;
         this.spriteRenderers = new SpriteRenderer[maxBatchSize];
         this.textures = new ArrayList<>();
-        this.shader = AssetPool.loadShader("assets/shaders/default.glsl");
-        this.shader.compile();
-
         this.vertices = new float[maxBatchSize * VERTEX_PER_QUAD * VERTEX_SIZE];
 
         this.numSprites = 0;
@@ -111,6 +109,9 @@ public class RenderBatch implements Comparable<RenderBatch> {
 
         glVertexAttribPointer(3, TEX_INDEX_SIZE, GL_FLOAT, false, VERTEX_SIZE_BYTES, TEX_INDEX_OFFSET);
         glEnableVertexAttribArray(3);
+
+        glVertexAttribPointer(4, ENTITY_ID_INDEX_SIZE, GL_FLOAT, false, VERTEX_SIZE_BYTES, ENTITY_ID_INDEX_OFFSET);
+        glEnableVertexAttribArray(4);
     }
 
     public void addSpriteRenderer(SpriteRenderer spriteRenderer) {
@@ -198,6 +199,10 @@ public class RenderBatch implements Comparable<RenderBatch> {
             // Set tex index
             vertices[offset + 8] = slotIndex;
 
+            // Set entity id
+            // Plus 1 because we will minus 1 after getting the value (See PickingTexture#readPixel)
+            vertices[offset + 9] = spr.gameObject.getUid() + 1;
+
             offset += VERTEX_SIZE;
         }
     }
@@ -218,7 +223,7 @@ public class RenderBatch implements Comparable<RenderBatch> {
             glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
         }
 
-        shader.use();
+        Shader shader = Renderer.getBoundShader();
         shader.setMat4f("uProjection", Window.get().getCurrentScene().getCamera().getProjectionMatrix());
         shader.setMat4f("uView", Window.get().getCurrentScene().getCamera().getViewMatrix());
 

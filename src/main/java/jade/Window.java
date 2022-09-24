@@ -5,6 +5,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR;
 import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
 import static org.lwjgl.glfw.GLFW.GLFW_MAXIMIZED;
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_FORWARD_COMPAT;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_PROFILE;
@@ -33,6 +34,7 @@ import static org.lwjgl.glfw.GLFW.glfwWindowHint;
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 import static org.lwjgl.opengl.GL11.GL_BLEND;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.GL_RENDERER;
 import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
@@ -40,6 +42,7 @@ import static org.lwjgl.opengl.GL11.GL_VERSION;
 import static org.lwjgl.opengl.GL11.glBlendFunc;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL11.glGetString;
 import static org.lwjgl.opengl.GL11.glViewport;
@@ -64,9 +67,13 @@ import imgui.glfw.ImGuiImplGlfw;
 import imgui.type.ImBoolean;
 import renderer.DebugDraw;
 import renderer.Framebuffer;
+import renderer.PickingTexture;
+import renderer.Renderer;
+import renderer.Shader;
 import scenes.LevelEditorScene;
 import scenes.LevelScene;
 import scenes.Scene;
+import util.AssetPool;
 
 public final class Window {
     private static final MouseListener mouseListener = MouseListener.getInstance();
@@ -81,6 +88,7 @@ public final class Window {
     private Scene currentScene;
 
     private Framebuffer framebuffer;
+    private PickingTexture pickingTexture;
 
     // ImGui
     private final ImGuiLayer imGuiLayer;
@@ -207,6 +215,7 @@ public final class Window {
         System.err.println("Device: " + glGetString(GL_RENDERER));
 
         framebuffer = new Framebuffer(3840, 2160);
+        pickingTexture = new PickingTexture(3840, 2160);
         glViewport(0, 0, 3840, 2160);
 
         get().changeScene(0);
@@ -246,13 +255,46 @@ public final class Window {
         double endTime;
         double dt = -1.0;
 
+        Shader defaultShader = AssetPool.loadShader("assets/shaders/default.glsl");
+        Shader pickingShader = AssetPool.loadShader("assets/shaders/pickingShader.glsl");
+
         while(!glfwWindowShouldClose(glfwWindowPtr)) {
-            startFrame();
+            // Start Frame
+
+            // Render pass 1. Render to picking texture
+            glDisable(GL_BLEND);
+            pickingTexture.enableWriting();
+            glViewport(0, 0, 3840, 2160);
+            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            Renderer.bindShader(pickingShader);
+            currentScene.render();
+
+            if (MouseListener.getInstance().isPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+                int x = (int)MouseListener.getInstance().getScreenX();
+                int y = (int)MouseListener.getInstance().getScreenY();
+                System.out.println(pickingTexture.readPixel(x, y));
+            }
+
+            pickingTexture.disableWriting();
+            glEnable(GL_BLEND);
+
+            // Render pass 2. Render to framebuffer
+            framebuffer.bind();
+            glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            // ImGui Start frame
+            imGuiGlfw.newFrame();
+            ImGui.newFrame();
 
             // NOTE: Maybe It will be better to merge update and sceneImGui method?
             if (dt > 0) {
                 DebugDraw.draw();
+                Renderer.bindShader(defaultShader);
                 currentScene.update(dt);
+                currentScene.render();
             }
             framebuffer.unBind();
 
@@ -287,16 +329,6 @@ public final class Window {
         ImGui.popStyleVar(2);
 
         ImGui.dockSpace(ImGui.getID("Docksapce"));
-    }
-
-    private void startFrame() {
-        framebuffer.bind();
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        // ImGui Start frame
-        imGuiGlfw.newFrame();
-        ImGui.newFrame();
     }
 
     private void endFrame() {

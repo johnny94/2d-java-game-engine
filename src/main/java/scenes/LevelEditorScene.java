@@ -1,7 +1,6 @@
 package scenes;
 
 import org.joml.Vector2f;
-import org.joml.Vector3f;
 
 import components.GridLines;
 import components.MouseControls;
@@ -14,7 +13,6 @@ import jade.Camera;
 import jade.GameObject;
 import jade.Prefabs;
 import jade.Transform;
-import renderer.DebugDraw;
 import util.AssetPool;
 import util.Settings;
 
@@ -83,15 +81,14 @@ public class LevelEditorScene extends Scene {
     public void update(double deltaTime) {
         levelEditorObject.update(deltaTime);
 
-        DebugDraw.drawBox(new Vector2f(200, 200), new Vector2f(64, 24), 30.0f,
-                          new Vector3f(0,1,0), 1);
-        DebugDraw.drawCircle(new Vector2f(300, 300), 64, new Vector3f(1,0,0), 1);
-
         // I think this should be moved to super class
         for (GameObject g : gameObjects) {
             g.update(deltaTime);
         }
+    }
 
+    @Override
+    public void render() {
         this.renderer.render();
     }
 

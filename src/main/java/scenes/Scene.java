@@ -35,6 +35,7 @@ public abstract class Scene {
     }
 
     public abstract void update(double deltaTime);
+    public abstract void render();
 
     public void addGameObject(GameObject gameObject) {
         // If we add a game object in a running scene, we start it immediately.

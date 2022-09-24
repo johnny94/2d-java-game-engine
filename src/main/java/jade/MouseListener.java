@@ -69,6 +69,19 @@ public final class MouseListener {
         return (float)xPos;
     }
 
+    // ? What's this value
+    public float getScreenX() {
+        float currentX = getX() - gameViewportPos.x;
+        currentX = (currentX / gameViewportSize.x) * 3840.0f; // TODO: Hardcoded
+        return currentX;
+    }
+
+    public float getScreenY() {
+        float currentY = getY() - gameViewportPos.y;
+        currentY = 2160.0f - ((currentY / gameViewportSize.y) * 2160.0f); // TODO: Hardcoded
+        return currentY;
+    }
+
     public float getOrthoX() {
         float currentX = getX() - gameViewportPos.x;
 
