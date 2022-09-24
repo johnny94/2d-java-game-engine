@@ -42,12 +42,14 @@ import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
 import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL11.glGetString;
+import static org.lwjgl.opengl.GL11.glViewport;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
+import editor.GameViewWindow;
 import imgui.ImFontAtlas;
 import imgui.ImFontConfig;
 import imgui.ImGui;
@@ -111,6 +113,14 @@ public final class Window {
 
     public int getHeight() {
         return height;
+    }
+
+    public float getTargetAspectRatio() {
+        return 16.0f / 9.0f;
+    }
+
+    public Framebuffer getFramebuffer() {
+        return framebuffer;
     }
 
     public void run() {
@@ -197,6 +207,8 @@ public final class Window {
         System.err.println("Device: " + glGetString(GL_RENDERER));
 
         framebuffer = new Framebuffer(3840, 2160);
+        glViewport(0, 0, 3840, 2160);
+
         get().changeScene(0);
     }
 
@@ -237,7 +249,6 @@ public final class Window {
         while(!glfwWindowShouldClose(glfwWindowPtr)) {
             startFrame();
 
-            framebuffer.bind();
             // NOTE: Maybe It will be better to merge update and sceneImGui method?
             if (dt > 0) {
                 DebugDraw.draw();
@@ -248,6 +259,7 @@ public final class Window {
             setupDockSpace();
             imGuiLayer.imGui();
             currentScene.sceneImGui();
+            GameViewWindow.imgui();
 
             endFrame();
 
@@ -278,6 +290,7 @@ public final class Window {
     }
 
     private void startFrame() {
+        framebuffer.bind();
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
