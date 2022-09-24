@@ -52,10 +52,14 @@ import imgui.ImFontAtlas;
 import imgui.ImFontConfig;
 import imgui.ImGui;
 import imgui.ImGuiIO;
+import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.flag.ImGuiFreeTypeBuilderFlags;
+import imgui.flag.ImGuiStyleVar;
+import imgui.flag.ImGuiWindowFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
+import imgui.type.ImBoolean;
 import renderer.DebugDraw;
 import renderer.Framebuffer;
 import scenes.LevelEditorScene;
@@ -209,6 +213,7 @@ public final class Window {
         ImGui.createContext();
         ImGuiIO io = ImGui.getIO();
         io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
+        io.setConfigFlags(ImGuiConfigFlags.DockingEnable);
 
         // Set fonts
         ImFontAtlas imFontAtlas = io.getFonts();
@@ -232,7 +237,7 @@ public final class Window {
         while(!glfwWindowShouldClose(glfwWindowPtr)) {
             startFrame();
 
-            //framebuffer.bind();
+            framebuffer.bind();
             // NOTE: Maybe It will be better to merge update and sceneImGui method?
             if (dt > 0) {
                 DebugDraw.draw();
@@ -240,6 +245,7 @@ public final class Window {
             }
             framebuffer.unBind();
 
+            setupDockSpace();
             imGuiLayer.imGui();
             currentScene.sceneImGui();
 
@@ -253,6 +259,24 @@ public final class Window {
         currentScene.saveExit();
     }
 
+    private void setupDockSpace() {
+        int windowFlags = ImGuiWindowFlags.MenuBar | ImGuiWindowFlags.NoDocking;
+
+        ImGui.setNextWindowPos(0.0f, 0.0f, ImGuiCond.Always);
+        ImGui.setNextWindowSize(this.width, this.height);
+        ImGui.pushStyleVar(ImGuiStyleVar.WindowRounding, 0.0f);
+        ImGui.pushStyleVar(ImGuiStyleVar.WindowBorderSize, 0.0f);
+
+        windowFlags |= ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse |
+                       ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove |
+                       ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoNavFocus;
+
+        ImGui.begin("Dockspace demo", new ImBoolean(true), windowFlags);
+        ImGui.popStyleVar(2);
+
+        ImGui.dockSpace(ImGui.getID("Docksapce"));
+    }
+
     private void startFrame() {
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -263,6 +287,8 @@ public final class Window {
     }
 
     private void endFrame() {
+        ImGui.end(); // end for setupDockSpace()
+
         ImGui.render();
         imGuiGl3.renderDrawData(ImGui.getDrawData());
 
