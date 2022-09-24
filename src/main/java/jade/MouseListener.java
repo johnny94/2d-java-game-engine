@@ -4,6 +4,8 @@ import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LAST;
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 
+import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector4f;
 
 public final class MouseListener {
@@ -20,6 +22,9 @@ public final class MouseListener {
 
     private final boolean[] mouseButtonPressed = new boolean[GLFW_MOUSE_BUTTON_LAST + 1];
     private boolean isDragging;
+
+    private Vector2f gameViewportPos = new Vector2f();
+    private Vector2f gameViewportSize = new Vector2f();
 
     private MouseListener() {}
 
@@ -65,30 +70,34 @@ public final class MouseListener {
     }
 
     public float getOrthoX() {
-        float currentX = getX();
+        float currentX = getX() - gameViewportPos.x;
 
         // Convert to NDC
-        currentX = (currentX / Window.get().getWidth()) * 2.0f - 1.0f;
+        currentX = (currentX / gameViewportSize.x) * 2.0f - 1.0f;
+
+        Camera camera = Window.get().getCurrentScene().getCamera();
+        Matrix4f viewProjection = new Matrix4f();
+        camera.getInverseViewMatrix().mul(camera.getInverseProjectionMatrix(), viewProjection);
 
         Vector4f tmp = new Vector4f(currentX, 0, 0, 1);
-        Camera c = Window.get().getCurrentScene().getCamera();
-        tmp.mul(c.getInverseProjectionMatrix())
-           .mul(c.getInverseViewMatrix());
+        tmp.mul(viewProjection);
 
         return tmp.x;
     }
 
     public float getOrthoY() {
-        // Y coordinate need to be flip
-        float currentY = Window.get().getHeight() - getY();
+        float currentY = getY() - gameViewportPos.y;
 
         // Convert to NDC
-        currentY = (currentY / Window.get().getHeight()) * 2.0f - 1.0f;
+        // Y coordinate need to be flip
+        currentY = -((currentY / gameViewportSize.y) * 2.0f - 1.0f);
+
+        Camera camera = Window.get().getCurrentScene().getCamera();
+        Matrix4f viewProjection = new Matrix4f();
+        camera.getInverseViewMatrix().mul(camera.getInverseProjectionMatrix(), viewProjection);
 
         Vector4f tmp = new Vector4f(0, currentY, 0, 1);
-        Camera c = Window.get().getCurrentScene().getCamera();
-        tmp.mul(c.getInverseProjectionMatrix())
-           .mul(c.getInverseViewMatrix());
+        tmp.mul(viewProjection);
 
         return tmp.y;
     }
@@ -121,4 +130,11 @@ public final class MouseListener {
         return mouseButtonPressed[button];
     }
 
+    public void setGameViewportPos(Vector2f gameViewportPos) {
+        this.gameViewportPos.set(gameViewportPos);
+    }
+
+    public void setGameViewportSize(Vector2f gameViewportSize) {
+        this.gameViewportSize.set(gameViewportSize);
+    }
 }
