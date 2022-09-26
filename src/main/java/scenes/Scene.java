@@ -7,9 +7,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import components.Component;
-import imgui.ImGui;
 import jade.Camera;
 import jade.GameObject;
 import renderer.Renderer;
@@ -21,7 +21,6 @@ public abstract class Scene {
     protected Renderer renderer = new Renderer();
     protected Camera camera;
     protected final List<GameObject> gameObjects = new ArrayList<>();
-    protected GameObject activeGameObject = null;
     protected boolean levelLoaded;
 
     public void init() { }
@@ -49,19 +48,14 @@ public abstract class Scene {
         }
     }
 
-    public Camera getCamera() {
-        return this.camera;
+    public Optional<GameObject> getGameObject(int uid) {
+        return gameObjects.stream()
+                          .filter(gameObject -> gameObject.getUid() == uid)
+                          .findFirst();
     }
 
-    // Note: I think this should be invoked by update
-    public void sceneImGui() {
-        if (activeGameObject != null) {
-            ImGui.begin("Inspector");
-            activeGameObject.imGui();
-            ImGui.end();
-        }
-
-        imGui();
+    public Camera getCamera() {
+        return this.camera;
     }
 
     public void imGui() {

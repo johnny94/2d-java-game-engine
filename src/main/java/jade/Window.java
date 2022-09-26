@@ -5,7 +5,6 @@ import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR;
 import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
 import static org.lwjgl.glfw.GLFW.GLFW_MAXIMIZED;
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_FORWARD_COMPAT;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_PROFILE;
@@ -15,7 +14,6 @@ import static org.lwjgl.glfw.GLFW.GLFW_VISIBLE;
 import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
 import static org.lwjgl.glfw.GLFW.glfwDefaultWindowHints;
 import static org.lwjgl.glfw.GLFW.glfwDestroyWindow;
-import static org.lwjgl.glfw.GLFW.glfwGetCurrentContext;
 import static org.lwjgl.glfw.GLFW.glfwGetTime;
 import static org.lwjgl.glfw.GLFW.glfwInit;
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
@@ -52,19 +50,6 @@ import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
-import editor.GameViewWindow;
-import imgui.ImFontAtlas;
-import imgui.ImFontConfig;
-import imgui.ImGui;
-import imgui.ImGuiIO;
-import imgui.flag.ImGuiCond;
-import imgui.flag.ImGuiConfigFlags;
-import imgui.flag.ImGuiFreeTypeBuilderFlags;
-import imgui.flag.ImGuiStyleVar;
-import imgui.flag.ImGuiWindowFlags;
-import imgui.gl3.ImGuiImplGl3;
-import imgui.glfw.ImGuiImplGlfw;
-import imgui.type.ImBoolean;
 import renderer.DebugDraw;
 import renderer.Framebuffer;
 import renderer.PickingTexture;
@@ -91,20 +76,16 @@ public final class Window {
     private PickingTexture pickingTexture;
 
     // ImGui
-    private final ImGuiLayer imGuiLayer;
-    private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
-    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
-    private static final String GLSL_VERSION = "#version 330 core";
+    private ImGuiLayer imGuiLayer;
 
-    private Window(ImGuiLayer imGuiLayer) {
+    private Window() {
         this.width = 1920;
         this.height = 1080;
         this.title = "Mario";
-        this.imGuiLayer = imGuiLayer;
     }
 
     private static final class WindowHolder {
-        static final Window window = new Window(new ImGuiLayer());
+        static final Window window = new Window();
     }
 
     public Scene getCurrentScene() {
@@ -159,9 +140,9 @@ public final class Window {
 
     private void init() {
         initWindow();
-        initImGui();
-        imGuiGlfw.init(glfwWindowPtr, true);
-        imGuiGl3.init(GLSL_VERSION);
+
+        this.imGuiLayer = new ImGuiLayer(glfwWindowPtr, pickingTexture);
+        imGuiLayer.initImGui();
     }
 
     private void initWindow() {
@@ -230,26 +211,6 @@ public final class Window {
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE); // Required for Mac
     }
 
-    private void initImGui() {
-        ImGui.createContext();
-        ImGuiIO io = ImGui.getIO();
-        io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
-        io.setConfigFlags(ImGuiConfigFlags.DockingEnable);
-
-        // Set fonts
-        ImFontAtlas imFontAtlas = io.getFonts();
-        ImFontConfig imFontConfig = new ImFontConfig();
-
-        imFontConfig.setPixelSnapH(true);
-        io.getFonts().addFontFromFileTTF("assets/fonts/NotoSans-Regular.ttf", 24,
-                                         imFontConfig, imFontAtlas.getGlyphRangesDefault());
-
-        imFontConfig.destroy();
-
-        imFontAtlas.setFlags(ImGuiFreeTypeBuilderFlags.LightHinting);
-        imFontAtlas.build();
-    }
-
     private void loop() {
         double beginTime = glfwGetTime();
         double endTime;
@@ -259,7 +220,6 @@ public final class Window {
         Shader pickingShader = AssetPool.loadShader("assets/shaders/pickingShader.glsl");
 
         while(!glfwWindowShouldClose(glfwWindowPtr)) {
-            // Start Frame
 
             // Render pass 1. Render to picking texture
             glDisable(GL_BLEND);
@@ -271,12 +231,6 @@ public final class Window {
             Renderer.bindShader(pickingShader);
             currentScene.render();
 
-            if (MouseListener.getInstance().isPressed(GLFW_MOUSE_BUTTON_LEFT)) {
-                int x = (int)MouseListener.getInstance().getScreenX();
-                int y = (int)MouseListener.getInstance().getScreenY();
-                System.out.println(pickingTexture.readPixel(x, y));
-            }
-
             pickingTexture.disableWriting();
             glEnable(GL_BLEND);
 
@@ -284,10 +238,6 @@ public final class Window {
             framebuffer.bind();
             glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
-
-            // ImGui Start frame
-            imGuiGlfw.newFrame();
-            ImGui.newFrame();
 
             // NOTE: Maybe It will be better to merge update and sceneImGui method?
             if (dt > 0) {
@@ -298,12 +248,10 @@ public final class Window {
             }
             framebuffer.unBind();
 
-            setupDockSpace();
-            imGuiLayer.imGui();
-            currentScene.sceneImGui();
-            GameViewWindow.imgui();
+            imGuiLayer.update(dt, currentScene);
 
-            endFrame();
+            glfwSwapBuffers(glfwWindowPtr);
+            glfwPollEvents();
 
             endTime = glfwGetTime();
             dt = endTime - beginTime;
@@ -313,45 +261,8 @@ public final class Window {
         currentScene.saveExit();
     }
 
-    private void setupDockSpace() {
-        int windowFlags = ImGuiWindowFlags.MenuBar | ImGuiWindowFlags.NoDocking;
-
-        ImGui.setNextWindowPos(0.0f, 0.0f, ImGuiCond.Always);
-        ImGui.setNextWindowSize(this.width, this.height);
-        ImGui.pushStyleVar(ImGuiStyleVar.WindowRounding, 0.0f);
-        ImGui.pushStyleVar(ImGuiStyleVar.WindowBorderSize, 0.0f);
-
-        windowFlags |= ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse |
-                       ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove |
-                       ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoNavFocus;
-
-        ImGui.begin("Dockspace demo", new ImBoolean(true), windowFlags);
-        ImGui.popStyleVar(2);
-
-        ImGui.dockSpace(ImGui.getID("Docksapce"));
-    }
-
-    private void endFrame() {
-        ImGui.end(); // end for setupDockSpace()
-
-        ImGui.render();
-        imGuiGl3.renderDrawData(ImGui.getDrawData());
-
-        if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
-            final long backupWindowPtr = glfwGetCurrentContext();
-            ImGui.updatePlatformWindows();
-            ImGui.renderPlatformWindowsDefault();
-            glfwMakeContextCurrent(backupWindowPtr);
-        }
-
-        glfwSwapBuffers(glfwWindowPtr);
-        glfwPollEvents();
-    }
-
     private void dispose() {
-        imGuiGl3.dispose();
-        imGuiGlfw.dispose();
-        disposeImGui();
+        imGuiLayer.dispose();
         disposeWindow();
     }
 
@@ -363,9 +274,5 @@ public final class Window {
         // Terminate GLFW and free the error callback
         glfwTerminate();
         glfwSetErrorCallback(null).free();
-    }
-
-    private void disposeImGui() {
-        ImGui.destroyContext();
     }
 }

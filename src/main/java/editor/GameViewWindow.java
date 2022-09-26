@@ -9,9 +9,9 @@ import jade.MouseListener;
 import jade.Window;
 
 public class GameViewWindow {
-    private static float leftX, rightX, topY, bottomY;
+    private float leftX, rightX, topY, bottomY;
 
-    public static void imgui() {
+    public void imgui() {
         ImGui.begin("Game Viewport", ImGuiWindowFlags.NoScrollbar |
                                      ImGuiWindowFlags.NoScrollWithMouse);
 
@@ -37,8 +37,12 @@ public class GameViewWindow {
 
         ImGui.end();
     }
+    public boolean getWantCaptureMouse() {
+        return MouseListener.getInstance().getX() >= leftX && MouseListener.getInstance().getX() <= rightX &&
+               MouseListener.getInstance().getY() >= bottomY && MouseListener.getInstance().getY() <= topY;
+    }
 
-    private static ImVec2 getLargestSizeForViewPort() {
+    private ImVec2 getLargestSizeForViewPort() {
         ImVec2 windowSize = getWindowSize();
 
         float aspectWidth = windowSize.x;
@@ -52,7 +56,7 @@ public class GameViewWindow {
         return new ImVec2(aspectWidth, aspectHeight);
     }
 
-    private static ImVec2 getCenteredPositionForViewport(ImVec2 aspectSize) {
+    private ImVec2 getCenteredPositionForViewport(ImVec2 aspectSize) {
         ImVec2 windowSize = getWindowSize();
         float viewportX = (windowSize.x / 2.0f) - (aspectSize.x / 2.0f);
         float viewportY = (windowSize.y / 2.0f) - (aspectSize.y / 2.0f);
@@ -61,7 +65,7 @@ public class GameViewWindow {
                           viewportY + ImGui.getCursorPosY());
     }
 
-    private static ImVec2 getWindowSize() {
+    private ImVec2 getWindowSize() {
         ImVec2 windowSize = new ImVec2();
         ImGui.getContentRegionAvail(windowSize);
         windowSize.x -= ImGui.getScrollX();
