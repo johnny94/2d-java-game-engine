@@ -53,6 +53,14 @@ public final class MouseListener {
         }
     }
 
+    public boolean mouseButtonDown(int button) {
+        if (button < mouseButtonPressed.length) {
+            return mouseButtonPressed[button];
+        }
+
+        return false;
+    }
+
     public void mouseScrollCallback(long window, double xOffset, double yOffset) {
         this.scrollX = xOffset;
         this.scrollY = yOffset;

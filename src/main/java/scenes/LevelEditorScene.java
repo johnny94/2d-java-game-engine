@@ -2,6 +2,7 @@ package scenes;
 
 import org.joml.Vector2f;
 
+import components.EditorCamera;
 import components.GridLines;
 import components.MouseControls;
 import components.Sprite;
@@ -28,11 +29,13 @@ public class LevelEditorScene extends Scene {
 
     @Override
     public void init() {
+        this.camera = new Camera(new Vector2f(0, 0));
+
         levelEditorObject.addComponent(new MouseControls());
         levelEditorObject.addComponent(new GridLines());
+        levelEditorObject.addComponent(new EditorCamera(this.camera));
 
         loadResource();
-        this.camera = new Camera(new Vector2f(0, 0));
         spriteSheet = AssetPool.getSpriteSheet("assets/images/spritesheets/decorationsAndBlocks.png");
 
         /*object1 = new GameObject("Obj1",
@@ -72,8 +75,9 @@ public class LevelEditorScene extends Scene {
     }
 
     @Override
-    public void update(double deltaTime) {
+    public void update(float deltaTime) {
         levelEditorObject.update(deltaTime);
+        this.camera.adjustProjection();
 
         // I think this should be moved to super class
         for (GameObject g : gameObjects) {

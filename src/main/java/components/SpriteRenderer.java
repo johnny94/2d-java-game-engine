@@ -40,7 +40,7 @@ public class SpriteRenderer extends Component {
     }
 
     @Override
-    public void update(double deltaTime) {
+    public void update(float deltaTime) {
         if (!this.lastTransform.equals(this.gameObject.transform)) {
             this.gameObject.transform.copy(lastTransform);
             this.isDirty = true;

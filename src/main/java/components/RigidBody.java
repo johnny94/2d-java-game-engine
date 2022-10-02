@@ -11,7 +11,7 @@ public class RigidBody extends Component {
     public transient Vector4f tmp = new Vector4f(0, 0, 0, 0);
 
     @Override
-    public void update(double deltaTime) {
+    public void update(float deltaTime) {
 
     }
 }

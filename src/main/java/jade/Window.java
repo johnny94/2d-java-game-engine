@@ -212,9 +212,9 @@ public final class Window {
     }
 
     private void loop() {
-        double beginTime = glfwGetTime();
-        double endTime;
-        double dt = -1.0;
+        float beginTime = (float)glfwGetTime();
+        float endTime;
+        float dt = -1.0f;
 
         Shader defaultShader = AssetPool.loadShader("assets/shaders/default.glsl");
         Shader pickingShader = AssetPool.loadShader("assets/shaders/pickingShader.glsl");
@@ -251,9 +251,11 @@ public final class Window {
             imGuiLayer.update(dt, currentScene);
 
             glfwSwapBuffers(glfwWindowPtr);
+            MouseListener.getInstance().endFrame();
+
             glfwPollEvents();
 
-            endTime = glfwGetTime();
+            endTime = (float)glfwGetTime();
             dt = endTime - beginTime;
             beginTime = endTime;
         }

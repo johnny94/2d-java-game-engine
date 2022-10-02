@@ -21,7 +21,7 @@ public class MouseControls extends Component {
     }
 
     @Override
-    public void update(double deltaTime) {
+    public void update(float deltaTime) {
         if (this.holdingObject != null) {
             holdingObject.transform.position.x = (int)(mouseListener.getOrthoX() / Settings.GRID_WIDTH) *
                                                  Settings.GRID_WIDTH;

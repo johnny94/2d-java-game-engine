@@ -11,7 +11,7 @@ public class LevelScene extends Scene {
     }
 
     @Override
-    public void update(double deltaTime) {
+    public void update(float deltaTime) {
         if(KeyListener.getInstance().isKeyPressed(GLFW_KEY_SPACE)) {
             Window.get().changeScene(1);
         }

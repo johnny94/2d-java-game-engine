@@ -39,7 +39,7 @@ public class GameObject {
         }
     }
 
-    public void update(double deltaTime) {
+    public void update(float deltaTime) {
         for (Component c : components) {
              c.update(deltaTime);
         }

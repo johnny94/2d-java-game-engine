@@ -33,7 +33,7 @@ public abstract class Scene {
         isRunning = true;
     }
 
-    public abstract void update(double deltaTime);
+    public abstract void update(float deltaTime);
     public abstract void render();
 
     public void addGameObject(GameObject gameObject) {
