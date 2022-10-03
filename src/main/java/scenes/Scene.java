@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import components.Component;
 import jade.Camera;
@@ -64,7 +65,9 @@ public abstract class Scene {
 
     public void saveExit() {
         try(FileWriter writer = new FileWriter("level.json")) {
-            writer.write(GsonUtils.DEFAULT_GSON.toJson(this.gameObjects));
+            List<GameObject> target = this.gameObjects.stream().filter(GameObject::isDoSerialization)
+                                                      .collect(Collectors.toList());
+            writer.write(GsonUtils.DEFAULT_GSON.toJson(target));
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -89,6 +89,10 @@ public class ImGuiLayer {
         imGuiGl3.init("#version 330 core");
     }
 
+    public PropertiesWindow getPropertiesWindow() {
+        return propertiesWindow;
+    }
+
     public void update(double deltaTime, Scene currentScene) {
         // ImGui Start frame
         imGuiGlfw.newFrame();
@@ -114,6 +118,12 @@ public class ImGuiLayer {
 
     }
 
+    public void dispose() {
+        imGuiGl3.dispose();
+        imGuiGlfw.dispose();
+        ImGui.destroyContext();
+    }
+
     private void setupDockSpace() {
         int windowFlags = ImGuiWindowFlags.MenuBar | ImGuiWindowFlags.NoDocking;
 
@@ -132,9 +142,4 @@ public class ImGuiLayer {
         ImGui.dockSpace(ImGui.getID("Docksapce"));
     }
 
-    public void dispose() {
-        imGuiGl3.dispose();
-        imGuiGlfw.dispose();
-        ImGui.destroyContext();
-    }
 }

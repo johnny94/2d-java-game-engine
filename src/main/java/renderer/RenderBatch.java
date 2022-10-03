@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 
@@ -163,6 +164,15 @@ public class RenderBatch implements Comparable<RenderBatch> {
             }
         }
 
+        boolean isRotated = spr.gameObject.transform.rotation != 0.0f;
+        Matrix4f transformMatrix = new Matrix4f().identity();
+        if (isRotated) {
+            transformMatrix.translate(spr.gameObject.transform.position.x,
+                                      spr.gameObject.transform.position.y, 0);
+            transformMatrix.rotate((float)Math.toRadians(spr.gameObject.transform.rotation), 0, 0, 1);
+            transformMatrix.scale(spr.gameObject.transform.scale.x, spr.gameObject.transform.scale.y, 1);
+        }
+
         // Add vertices with appropriate properties
         // The algorithm here is to generate a quad (4 vertices) with a given position
         // It will generate vertices in this order: top-left, bottom-left, bottom-right, top-left
@@ -180,11 +190,17 @@ public class RenderBatch implements Comparable<RenderBatch> {
                 yAdd = 1.0f;
             }
 
+            Vector4f currentPos = new Vector4f(spr.gameObject.transform.position.x +
+                                               (xAdd * spr.gameObject.transform.scale.x),
+                                               spr.gameObject.transform.position.y +
+                                               (yAdd * spr.gameObject.transform.scale.y), 0, 1);
+            if (isRotated) {
+                currentPos = new Vector4f(xAdd, yAdd, 0, 1).mul(transformMatrix);
+            }
+
             // Set position
-            vertices[offset] = spr.gameObject.transform.position.x +
-                               (xAdd * spr.gameObject.transform.scale.x);
-            vertices[offset + 1] = spr.gameObject.transform.position.y +
-                               (yAdd * spr.gameObject.transform.scale.y);
+            vertices[offset] = currentPos.x;
+            vertices[offset + 1] = currentPos.y;
 
             // Set color
             vertices[offset + 2] = color.x;

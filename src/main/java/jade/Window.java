@@ -138,11 +138,15 @@ public final class Window {
         currentScene.start();
     }
 
+    public ImGuiLayer getImGuiLayer() {
+        return this.imGuiLayer;
+    }
+
     private void init() {
         initWindow();
-
         this.imGuiLayer = new ImGuiLayer(glfwWindowPtr, pickingTexture);
         imGuiLayer.initImGui();
+        changeScene(0);
     }
 
     private void initWindow() {
@@ -198,8 +202,6 @@ public final class Window {
         framebuffer = new Framebuffer(3840, 2160);
         pickingTexture = new PickingTexture(3840, 2160);
         glViewport(0, 0, 3840, 2160);
-
-        get().changeScene(0);
     }
 
     private void decideGlGlslVersions() {

@@ -8,12 +8,14 @@ import components.MouseControls;
 import components.Sprite;
 import components.SpriteRenderer;
 import components.SpriteSheet;
+import components.TranslateGizmo;
 import imgui.ImGui;
 import imgui.ImVec2;
 import jade.Camera;
 import jade.GameObject;
 import jade.Prefabs;
 import jade.Transform;
+import jade.Window;
 import util.AssetPool;
 import util.Settings;
 
@@ -30,13 +32,17 @@ public class LevelEditorScene extends Scene {
     @Override
     public void init() {
         this.camera = new Camera(new Vector2f(0, 0));
+        loadResource();
+        spriteSheet = AssetPool.getSpriteSheet("assets/images/spritesheets/decorationsAndBlocks.png");
+        SpriteSheet gizmos = AssetPool.getSpriteSheet("assets/images/gizmos.png");
 
         levelEditorObject.addComponent(new MouseControls());
         levelEditorObject.addComponent(new GridLines());
         levelEditorObject.addComponent(new EditorCamera(this.camera));
+        levelEditorObject.addComponent(new TranslateGizmo(gizmos.getSprite(1),
+                                                          Window.get().getImGuiLayer().getPropertiesWindow()));
 
-        loadResource();
-        spriteSheet = AssetPool.getSpriteSheet("assets/images/spritesheets/decorationsAndBlocks.png");
+        levelEditorObject.start();
 
         /*object1 = new GameObject("Obj1",
                                  new Transform(new Vector2f(100, 100), new Vector2f(256, 256)),
@@ -60,6 +66,9 @@ public class LevelEditorScene extends Scene {
         AssetPool.loadSpriteSheet("assets/images/spritesheets/decorationsAndBlocks.png",
                                   new SpriteSheet(AssetPool.loadTexture("assets/images/spritesheets/decorationsAndBlocks.png"),
                                                   16, 16, 81, 0));
+        AssetPool.loadSpriteSheet("assets/images/gizmos.png",
+                                  new SpriteSheet(AssetPool.loadTexture("assets/images/gizmos.png"),
+                                                  24, 48, 2, 0));
         AssetPool.loadTexture("assets/images/green.png");
 
         // Note: I think this should be done when deserialize the Texture.
@@ -92,6 +101,10 @@ public class LevelEditorScene extends Scene {
 
     @Override
     public void imGui() {
+        ImGui.begin("Level Editor Stuff");
+        levelEditorObject.imGui();
+        ImGui.end();
+
         ImGui.begin("Test Window");
 
         ImVec2 windowPos = ImGui.getWindowPos();

@@ -3,6 +3,7 @@ package components;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -57,6 +58,12 @@ public abstract class Component {
                     boolean val = (boolean)value;
                     if (ImGui.checkbox(name + ": ", val)) {
                         field.set(this, !val);
+                    }
+                } else if (type.equals(Vector2f.class)) {
+                    Vector2f val = (Vector2f)value;
+                    float[] imVec = { val.x, val.y };
+                    if (ImGui.dragFloat2(name + ": ", imVec)) {
+                        val.set(imVec);
                     }
                 } else if (type.equals(Vector3f.class)) {
                     Vector3f val = (Vector3f)value;
