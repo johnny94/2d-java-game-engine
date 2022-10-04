@@ -15,10 +15,10 @@ public final class MouseListener {
 
     private double scrollX;
     private double scrollY;
-    private double xPos;
-    private double yPos;
-    private double xLast;
-    private double yLast;
+    private double xPos, yPos, xLast, yLast;
+    private double worldX, worldY, lastWorldX, lastWorldY;
+
+    private int mouseButtonDown;
 
     private final boolean[] mouseButtonPressed = new boolean[GLFW_MOUSE_BUTTON_LAST + 1];
     private boolean isDragging;
@@ -33,21 +33,27 @@ public final class MouseListener {
     }
 
     public void mousePosCallback(long window, double xPos, double yPos) {
+        if (mouseButtonDown > 0) {
+            isDragging = true;
+        }
+
         this.xLast = this.xPos;
         this.yLast = this.yPos;
+        this.lastWorldX = this.worldX;
+        this.lastWorldY = this.worldY;
         this.xPos = xPos;
         this.yPos = yPos;
 
-        this.isDragging = false;
-        for(boolean value : mouseButtonPressed) {
-            this.isDragging |= value;
-        }
+        calOrthoX();
+        calOrthoY();
     }
 
     public void mouseButtonCallback(long window, int button, int action, int mods) {
         if (action == GLFW_PRESS) {
+            mouseButtonDown++;
             this.mouseButtonPressed[button] = true;
         } else if (action == GLFW_RELEASE) {
+            mouseButtonDown--;
             this.mouseButtonPressed[button] = false;
             this.isDragging = false;
         }
@@ -71,6 +77,8 @@ public final class MouseListener {
         this.scrollY = 0;
         this.xLast = this.xPos;
         this.yLast = this.yPos;
+        this.lastWorldX = this.worldX;
+        this.lastWorldY = this.worldY;
     }
 
     public float getX() {
@@ -91,6 +99,10 @@ public final class MouseListener {
     }
 
     public float getOrthoX() {
+        return (float) worldX;
+    }
+
+    private void calOrthoX() {
         float currentX = getX() - gameViewportPos.x;
 
         // Convert to NDC
@@ -103,10 +115,14 @@ public final class MouseListener {
         Vector4f tmp = new Vector4f(currentX, 0, 0, 1);
         tmp.mul(viewProjection);
 
-        return tmp.x;
+        this.worldX = tmp.x;
     }
 
     public float getOrthoY() {
+        return (float) worldY;
+    }
+
+    private void calOrthoY() {
         float currentY = getY() - gameViewportPos.y;
 
         // Convert to NDC
@@ -120,7 +136,7 @@ public final class MouseListener {
         Vector4f tmp = new Vector4f(0, currentY, 0, 1);
         tmp.mul(viewProjection);
 
-        return tmp.y;
+        this.worldY = tmp.y;
     }
 
     public float getY() {
@@ -131,8 +147,16 @@ public final class MouseListener {
         return (float)(xLast - xPos);
     }
 
+    public float getWorldDeltaX() {
+        return (float)(lastWorldX - worldX);
+    }
+
     public float getDeltaY() {
         return (float)(yLast - yPos);
+    }
+
+    public float getWorldDeltaY() {
+        return (float)(lastWorldY - worldY);
     }
 
     public float getScrollX() {

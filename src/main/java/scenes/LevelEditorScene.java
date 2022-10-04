@@ -3,19 +3,18 @@ package scenes;
 import org.joml.Vector2f;
 
 import components.EditorCamera;
+import components.GizmoManager;
 import components.GridLines;
 import components.MouseControls;
 import components.Sprite;
 import components.SpriteRenderer;
 import components.SpriteSheet;
-import components.TranslateGizmo;
 import imgui.ImGui;
 import imgui.ImVec2;
 import jade.Camera;
 import jade.GameObject;
 import jade.Prefabs;
 import jade.Transform;
-import jade.Window;
 import util.AssetPool;
 import util.Settings;
 
@@ -31,16 +30,16 @@ public class LevelEditorScene extends Scene {
 
     @Override
     public void init() {
-        this.camera = new Camera(new Vector2f(0, 0));
         loadResource();
+        this.camera = new Camera(new Vector2f(0, 0));
+
         spriteSheet = AssetPool.getSpriteSheet("assets/images/spritesheets/decorationsAndBlocks.png");
         SpriteSheet gizmos = AssetPool.getSpriteSheet("assets/images/gizmos.png");
 
         levelEditorObject.addComponent(new MouseControls());
         levelEditorObject.addComponent(new GridLines());
         levelEditorObject.addComponent(new EditorCamera(this.camera));
-        levelEditorObject.addComponent(new TranslateGizmo(gizmos.getSprite(1),
-                                                          Window.get().getImGuiLayer().getPropertiesWindow()));
+        levelEditorObject.addComponent(new GizmoManager(gizmos));
 
         levelEditorObject.start();
 
@@ -68,7 +67,7 @@ public class LevelEditorScene extends Scene {
                                                   16, 16, 81, 0));
         AssetPool.loadSpriteSheet("assets/images/gizmos.png",
                                   new SpriteSheet(AssetPool.loadTexture("assets/images/gizmos.png"),
-                                                  24, 48, 2, 0));
+                                                  24, 48, 3, 0));
         AssetPool.loadTexture("assets/images/green.png");
 
         // Note: I think this should be done when deserialize the Texture.

@@ -35,8 +35,15 @@ public class GameObject {
     }
 
     public void start() {
-        for (Component c : components) {
+        /*for (Component c : components) {
             c.start();
+        }*/
+
+        // TODO: WTF, why this works but the code above got a ConcurrentModificationException?
+        // Current known reason is because GizmoManager is adding components when levelEditorObject is iterating
+        // its components in start() (GizmoManager is also a component in levelEditorObject)
+        for(int i = 0; i < components.size(); i++) {
+            components.get(i).start();
         }
     }
 

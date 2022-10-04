@@ -4,6 +4,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 
 import java.util.Optional;
 
+import components.NonPickable;
 import imgui.ImGui;
 import jade.GameObject;
 import jade.MouseListener;
@@ -11,7 +12,7 @@ import renderer.PickingTexture;
 import scenes.Scene;
 
 public class PropertiesWindow {
-    private Optional<GameObject> activeGameObject = Optional.empty();
+    private GameObject activeGameObject;
     private PickingTexture pickingTexture;
 
     private float deBounce = 0.2f;
@@ -27,20 +28,25 @@ public class PropertiesWindow {
             int x = (int)MouseListener.getInstance().getScreenX();
             int y = (int)MouseListener.getInstance().getScreenY();
             int gameObjectUid = pickingTexture.readPixel(x, y);
-            activeGameObject = currentScene.getGameObject(gameObjectUid);
+            Optional<GameObject> pick = currentScene.getGameObject(gameObjectUid);
+            if (pick.isPresent() && !pick.get().getComponent(NonPickable.class).isPresent()) {
+                activeGameObject = pick.get();
+            } else if (!pick.isPresent() && !MouseListener.getInstance().isDragging()) {
+                activeGameObject = null;
+            }
             this.deBounce = 0.2f;
         }
     }
 
     public void imGui() {
-        if (activeGameObject.isPresent()) {
+        if (activeGameObject != null) {
             ImGui.begin("Properties");
-            activeGameObject.get().imGui();
+            activeGameObject.imGui();
             ImGui.end();
         }
     }
 
     public Optional<GameObject> getActiveGameObject() {
-        return this.activeGameObject;
+        return Optional.ofNullable(activeGameObject);
     }
 }
