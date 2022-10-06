@@ -14,7 +14,6 @@ import imgui.ImVec2;
 import jade.Camera;
 import jade.GameObject;
 import jade.Prefabs;
-import jade.Transform;
 import util.AssetPool;
 import util.Settings;
 
@@ -25,8 +24,7 @@ public class LevelEditorScene extends Scene {
 
     // Special Object that will not be added to and gameObject list (we don't want this to be serialized)
     // Note: Maybe we can find a way to organize this kind of special object.
-    private GameObject levelEditorObject = new GameObject("LevelEditor",
-                                                          new Transform(new Vector2f(), new Vector2f()), 0);
+    private GameObject levelEditorObject = this.createGameObject("LevelEditor");
 
     @Override
     public void init() {

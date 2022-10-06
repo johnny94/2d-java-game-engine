@@ -5,26 +5,20 @@ import java.util.List;
 import java.util.Optional;
 
 import components.Component;
+import components.Transform;
+import imgui.ImGui;
 
 public class GameObject {
     private static int ID_COUNTER;
     private int uid = -1;
 
-    private String name;
-    private List<Component> components = new ArrayList<>();
-    private int zIndex;
-
-    public Transform transform;
+    private final String name;
+    private final List<Component> components = new ArrayList<>();
+    public transient Transform transform;
     private boolean doSerialization = true;
 
     public GameObject(String name) {
-        this(name, new Transform(), 0);
-    }
-
-    public GameObject(String name, Transform transform, int zIndex) {
         this.name = name;
-        this.transform = transform;
-        this.zIndex = zIndex;
 
         this.uid = ID_COUNTER;
         ID_COUNTER++;
@@ -80,12 +74,10 @@ public class GameObject {
 
     public void imGui() {
         for (Component c : components) {
-            c.imGui();
+            if (ImGui.collapsingHeader(c.getClass().getSimpleName())) {
+                c.imGui();
+            }
         }
-    }
-
-    public int zIndex() {
-        return this.zIndex;
     }
 
     public int getUid() {

@@ -7,6 +7,7 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
+import editor.JImGui;
 import imgui.ImGui;
 import jade.GameObject;
 
@@ -44,16 +45,10 @@ public abstract class Component {
 
                 if (type.equals(int.class)) {
                     int val = (int)value;
-                    int[] imInt = { val };
-                    if (ImGui.dragInt(name + ": ", imInt)) {
-                        field.set(this, imInt[0]);
-                    }
+                    field.set(this, JImGui.drawInt(name, val));
                 } else if (type.equals(float.class)) {
                     float val = (float)value;
-                    float[] imFloat = { val };
-                    if (ImGui.dragFloat(name + ": ", imFloat)) {
-                        field.set(this, imFloat[0]);
-                    }
+                    field.set(this, JImGui.drawFloat(name, val));
                 } else if (type.equals(boolean.class)) {
                     boolean val = (boolean)value;
                     if (ImGui.checkbox(name + ": ", val)) {
@@ -61,10 +56,7 @@ public abstract class Component {
                     }
                 } else if (type.equals(Vector2f.class)) {
                     Vector2f val = (Vector2f)value;
-                    float[] imVec = { val.x, val.y };
-                    if (ImGui.dragFloat2(name + ": ", imVec)) {
-                        val.set(imVec);
-                    }
+                    JImGui.drawVec2Control(name, val);
                 } else if (type.equals(Vector3f.class)) {
                     Vector3f val = (Vector3f)value;
                     float[] imVec = { val.x, val.y, val.z };

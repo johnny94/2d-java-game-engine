@@ -10,6 +10,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
 import components.Component;
+import components.Transform;
 
 public class GameObjectDeserializer implements JsonDeserializer<GameObject> {
     @Override
@@ -19,14 +20,15 @@ public class GameObjectDeserializer implements JsonDeserializer<GameObject> {
 
         String name = jsonObject.get("name").getAsString();
         JsonArray components = jsonObject.getAsJsonArray("components");
-        Transform transform = context.deserialize(jsonObject.get("transform"), Transform.class);
-        int zIndex = jsonObject.get("zIndex").getAsInt();
 
-        GameObject go = new GameObject(name, transform, zIndex);
+        GameObject go = new GameObject(name);
         for (JsonElement element : components) {
             Component c = context.deserialize(element, Component.class);
             go.addComponent(c);
         }
+
+        // TODO: Can we improve this? (Every gameObject must has a Transform component)
+        go.transform = go.getComponent(Transform.class).get();
         return go;
     }
 }

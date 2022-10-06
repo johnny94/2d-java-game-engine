@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import components.Component;
+import components.Transform;
 import jade.Camera;
 import jade.GameObject;
 import renderer.Renderer;
@@ -36,6 +37,15 @@ public abstract class Scene {
 
     public abstract void update(float deltaTime);
     public abstract void render();
+
+    public GameObject createGameObject(String name) {
+        // TODO: Can we put this in the GameObject constructor?
+        GameObject gameObject = new GameObject(name);
+        gameObject.addComponent(new Transform());
+        gameObject.transform = gameObject.getComponent(Transform.class).get();
+
+        return gameObject;
+    }
 
     public void addGameObject(GameObject gameObject) {
         // If we add a game object in a running scene, we start it immediately.
