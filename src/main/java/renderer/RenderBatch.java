@@ -309,4 +309,24 @@ public class RenderBatch implements Comparable<RenderBatch> {
     public int compareTo(RenderBatch o) {
         return Integer.compare(this.zIndex, o.zIndex);
     }
+
+    public boolean destroyIfExist(SpriteRenderer spriteRenderer) {
+        for (int i = 0; i < numSprites; i++) {
+            if (spriteRenderers[i] == spriteRenderer) {
+
+                // [1, 2, 3, 4, 5]
+                // If 3 is remove target then the array will be
+                // [1, 2, 4, 5]
+                // TODO: Can we re-implement this with List?
+                for (int j = i; j < numSprites - 1; j++) {
+                    spriteRenderers[j] = spriteRenderers[j + 1];
+                    spriteRenderers[j].setDirty();
+                }
+                numSprites--;
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

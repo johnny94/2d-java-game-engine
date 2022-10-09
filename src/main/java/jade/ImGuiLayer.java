@@ -11,6 +11,7 @@ import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
 
 import editor.GameViewWindow;
+import editor.MenuBar;
 import editor.PropertiesWindow;
 import imgui.ImFontAtlas;
 import imgui.ImFontConfig;
@@ -34,11 +35,13 @@ public class ImGuiLayer {
 
     private GameViewWindow gameViewWindow;
     private PropertiesWindow propertiesWindow;
+    private MenuBar menuBar;
 
     public ImGuiLayer(long glfwWindowPtr, PickingTexture pickingTexture) {
         this.glfwWindowPtr = glfwWindowPtr;
         this.gameViewWindow = new GameViewWindow();
         this.propertiesWindow = new PropertiesWindow(pickingTexture);
+        this.menuBar = new MenuBar();
     }
 
     public void initImGui() {
@@ -104,6 +107,8 @@ public class ImGuiLayer {
 
         propertiesWindow.update(deltaTime, currentScene);
         propertiesWindow.imGui();
+
+        menuBar.imGui();
 
         ImGui.end();
         ImGui.render();

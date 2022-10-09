@@ -1,5 +1,7 @@
 package physics2d.components;
 
+import java.util.Optional;
+
 import org.jbox2d.dynamics.Body;
 import org.joml.Vector2f;
 
@@ -16,7 +18,7 @@ public class RigidBody2D extends Component {
     private boolean fixedRotation = false;
     private boolean continuousCollision = false;
 
-    private Body rawBody;
+    private transient Body rawBody;
 
     @Override
     public void update(float deltaTime) {
@@ -83,11 +85,15 @@ public class RigidBody2D extends Component {
         this.continuousCollision = continuousCollision;
     }
 
-    public Body getRawBody() {
-        return rawBody;
+    public Optional<Body> getRawBody() {
+        return Optional.ofNullable(rawBody);
     }
 
     public void setRawBody(Body rawBody) {
         this.rawBody = rawBody;
+    }
+
+    public void removeRawBody() {
+        this.rawBody = null;
     }
 }

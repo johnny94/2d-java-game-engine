@@ -27,7 +27,7 @@ public class Physics2D {
 
     public void add(GameObject gameObject) {
         Optional<RigidBody2D> maybeRigidBody2D = gameObject.getComponent(RigidBody2D.class);
-        if (maybeRigidBody2D.isPresent() && maybeRigidBody2D.get().getRawBody() == null) {
+        if (maybeRigidBody2D.isPresent() && !maybeRigidBody2D.get().getRawBody().isPresent()) {
             RigidBody2D rigidBody2D = maybeRigidBody2D.get();
             Transform transform = gameObject.transform;
 
@@ -78,6 +78,17 @@ public class Physics2D {
         if (physicsTime > 0) {
             physicsTime -= physicsTimeStep;
             world.step(physicsTimeStep, velocityIteration, positionIteration);
+        }
+    }
+
+    public void destroyGameObject(GameObject gameObject) {
+        Optional<RigidBody2D> maybeRigidBody2D = gameObject.getComponent(RigidBody2D.class);
+        if (maybeRigidBody2D.isPresent()) {
+            RigidBody2D rigidBody2D = maybeRigidBody2D.get();
+            if (rigidBody2D.getRawBody().isPresent()) {
+                world.destroyBody(rigidBody2D.getRawBody().get());
+                rigidBody2D.removeRawBody();
+            }
         }
     }
 }

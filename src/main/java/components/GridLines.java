@@ -12,7 +12,7 @@ public class GridLines extends Component {
     private static final Vector3f defaultColor = new Vector3f(0.2f, 0.2f, 0.2f);
 
     @Override
-    public void update(float deltaTime) {
+    public void editorUpdate(float deltaTime) {
         Camera camera = Window.get().getCurrentScene().getCamera();
         Vector2f cameraPos = camera.position;
         Vector2f projectionSize = camera.getProjectionSize();

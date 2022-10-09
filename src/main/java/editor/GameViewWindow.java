@@ -7,13 +7,31 @@ import imgui.ImVec2;
 import imgui.flag.ImGuiWindowFlags;
 import jade.MouseListener;
 import jade.Window;
+import observers.EventSystem;
+import observers.events.Event;
+import observers.events.EventType;
 
 public class GameViewWindow {
     private float leftX, rightX, topY, bottomY;
+    private boolean isPlaying;
 
     public void imgui() {
         ImGui.begin("Game Viewport", ImGuiWindowFlags.NoScrollbar |
-                                     ImGuiWindowFlags.NoScrollWithMouse);
+                                     ImGuiWindowFlags.NoScrollWithMouse |
+                                     ImGuiWindowFlags.MenuBar);
+
+        ImGui.beginMenuBar();
+        if (ImGui.menuItem("Play", "", isPlaying, !isPlaying)) {
+            isPlaying = true;
+            EventSystem.notify(null, new Event(EventType.GameEngineStartPlay));
+        }
+
+        if (ImGui.menuItem("Stop", "", !isPlaying, isPlaying)) {
+            isPlaying = false;
+            EventSystem.notify(null, new Event(EventType.GameEngineStopPlay));
+        }
+        ImGui.endMenuBar();
+
 
         ImVec2 windowSize = getLargestSizeForViewPort();
         ImVec2 windowPos = getCenteredPositionForViewport(windowSize);
@@ -73,8 +91,4 @@ public class GameViewWindow {
 
         return windowSize;
     }
-
-
-
-
 }

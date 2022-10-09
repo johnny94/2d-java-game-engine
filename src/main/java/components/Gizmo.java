@@ -64,6 +64,13 @@ public class Gizmo extends Component {
 
     @Override
     public void update(float deltaTime) {
+        if (using) {
+            setInactive();
+        }
+    }
+
+    @Override
+    public void editorUpdate(float deltaTime) {
         if (!using) {
             return;
         }

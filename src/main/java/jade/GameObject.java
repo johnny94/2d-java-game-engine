@@ -17,6 +17,8 @@ public class GameObject {
     public transient Transform transform;
     private boolean doSerialization = true;
 
+    private boolean isDead;
+
     public GameObject(String name) {
         this.name = name;
 
@@ -38,6 +40,12 @@ public class GameObject {
         // its components in start() (GizmoManager is also a component in levelEditorObject)
         for(int i = 0; i < components.size(); i++) {
             components.get(i).start();
+        }
+    }
+
+    public void editorUpdate(float deltaTime) {
+        for (Component c : components) {
+            c.editorUpdate(deltaTime);
         }
     }
 
@@ -94,5 +102,16 @@ public class GameObject {
 
     public boolean isDoSerialization() {
         return doSerialization;
+    }
+
+    public void destroy() {
+        isDead = true;
+        for(Component c : components) {
+            c.destroy();
+        }
+    }
+
+    public boolean isDead() {
+        return isDead;
     }
 }

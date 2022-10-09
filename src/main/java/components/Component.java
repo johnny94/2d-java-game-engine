@@ -18,7 +18,10 @@ public abstract class Component {
     public transient GameObject gameObject;
 
     public void start() { }
-    public abstract void update(float deltaTime);
+
+    // Maybe we should separate this to different interface?
+    public void update(float deltaTime) { }
+    public void editorUpdate(float deltaTime) { }
 
     public void setGameObject(GameObject gameObject) {
         this.gameObject = gameObject;
@@ -93,5 +96,9 @@ public abstract class Component {
 
     public static void init(int maxId) {
         ID_COUNTER = maxId;
+    }
+
+    public void destroy() {
+        // Do nothing
     }
 }

@@ -47,6 +47,14 @@ public class SpriteRenderer extends Component {
     }
 
     @Override
+    public void editorUpdate(float deltaTime) {
+        if (!this.lastTransform.equals(this.gameObject.transform)) {
+            this.gameObject.transform.copy(lastTransform);
+            this.isDirty = true;
+        }
+    }
+
+    @Override
     public void imGui() {
         if (JImGui.colorPicker4("Color Picker", this.color)) {
             this.isDirty = true;
@@ -67,6 +75,10 @@ public class SpriteRenderer extends Component {
 
     public boolean isDirty() {
         return this.isDirty;
+    }
+
+    public void setDirty() {
+        isDirty = true;
     }
 
     public void setClean() {

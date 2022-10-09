@@ -11,53 +11,32 @@ import components.SpriteRenderer;
 import components.SpriteSheet;
 import imgui.ImGui;
 import imgui.ImVec2;
-import jade.Camera;
 import jade.GameObject;
 import jade.Prefabs;
 import util.AssetPool;
 import util.Settings;
 
-public class LevelEditorScene extends Scene {
-
-    private GameObject object1;
+public class LevelEditorSceneInitializer extends SceneInitializer {
     private SpriteSheet spriteSheet;
-
-    // Special Object that will not be added to and gameObject list (we don't want this to be serialized)
-    // Note: Maybe we can find a way to organize this kind of special object.
-    private GameObject levelEditorObject = this.createGameObject("LevelEditor");
+    private GameObject levelEditorObject;
 
     @Override
-    public void init() {
-        loadResource();
-        this.camera = new Camera(new Vector2f(0, 0));
-
+    public void init(Scene scene) {
         spriteSheet = AssetPool.getSpriteSheet("assets/images/spritesheets/decorationsAndBlocks.png");
         SpriteSheet gizmos = AssetPool.getSpriteSheet("assets/images/gizmos.png");
 
+        levelEditorObject = scene.createGameObject("LevelEditor");
+        levelEditorObject.setNoSerialize();
         levelEditorObject.addComponent(new MouseControls());
         levelEditorObject.addComponent(new GridLines());
-        levelEditorObject.addComponent(new EditorCamera(this.camera));
+        levelEditorObject.addComponent(new EditorCamera(scene.getCamera()));
         levelEditorObject.addComponent(new GizmoManager(gizmos));
 
-        levelEditorObject.start();
-
-        /*object1 = new GameObject("Obj1",
-                                 new Transform(new Vector2f(100, 100), new Vector2f(256, 256)),
-                                 -1);
-        object1.addComponent(new SpriteRenderer(new Vector4f(1.0f, 0.0f, 0.0f, 1.0f)));
-        object1.addComponent(new RigidBody());
-        addGameObject(object1);
-        this.activeGameObject = object1;
-
-        GameObject object2 = new GameObject("Obj2",
-                                 new Transform(new Vector2f(100, 200), new Vector2f(256, 256)),
-                                            -2);
-        object2.addComponent(new SpriteRenderer(new Sprite(AssetPool.loadTexture("assets/images/green.png"),
-                                                           256,  256)));
-        addGameObject(object2);*/
+        scene.addGameObject(levelEditorObject);
     }
 
-    private void loadResource() {
+    @Override
+    public void loadResource(Scene scene) {
         AssetPool.loadShader("assets/shaders/default.glsl");
 
         AssetPool.loadSpriteSheet("assets/images/spritesheets/decorationsAndBlocks.png",
@@ -69,7 +48,7 @@ public class LevelEditorScene extends Scene {
         AssetPool.loadTexture("assets/images/green.png");
 
         // Note: I think this should be done when deserialize the Texture.
-        for(GameObject go : gameObjects) {
+        for(GameObject go : scene.getGameObjects()) {
             go.getComponent(SpriteRenderer.class)
               .ifPresent(spr -> {
                   if (spr.getTexture().isPresent()) {
@@ -78,22 +57,6 @@ public class LevelEditorScene extends Scene {
                   }
               });
         }
-    }
-
-    @Override
-    public void update(float deltaTime) {
-        levelEditorObject.update(deltaTime);
-        this.camera.adjustProjection();
-
-        // I think this should be moved to super class
-        for (GameObject g : gameObjects) {
-            g.update(deltaTime);
-        }
-    }
-
-    @Override
-    public void render() {
-        this.renderer.render();
     }
 
     @Override

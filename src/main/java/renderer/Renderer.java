@@ -60,4 +60,17 @@ public class Renderer {
             rb.render();
         }
     }
+
+    public void destroyGameObject(GameObject gameObject) {
+        Optional<SpriteRenderer> maybeSpriteRenderer = gameObject.getComponent(SpriteRenderer.class);
+        if (!maybeSpriteRenderer.isPresent()) {
+            return;
+        }
+
+        for (RenderBatch renderBatch : renderBatchs) {
+            if (renderBatch.destroyIfExist(maybeSpriteRenderer.get())) {
+                return;
+            }
+        }
+    }
 }

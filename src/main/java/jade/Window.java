@@ -50,17 +50,20 @@ import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
+import observers.EventSystem;
+import observers.Observer;
+import observers.events.Event;
 import renderer.DebugDraw;
 import renderer.Framebuffer;
 import renderer.PickingTexture;
 import renderer.Renderer;
 import renderer.Shader;
-import scenes.LevelEditorScene;
-import scenes.LevelScene;
+import scenes.LevelEditorSceneInitializer;
 import scenes.Scene;
+import scenes.SceneInitializer;
 import util.AssetPool;
 
-public final class Window {
+public final class Window implements Observer {
     private static final MouseListener mouseListener = MouseListener.getInstance();
     private static final KeyListener keyListener = KeyListener.getInstance();
 
@@ -75,6 +78,8 @@ public final class Window {
     private Framebuffer framebuffer;
     private PickingTexture pickingTexture;
 
+    private boolean runtimePlaying;
+
     // ImGui
     private ImGuiLayer imGuiLayer;
 
@@ -82,6 +87,28 @@ public final class Window {
         this.width = 1920;
         this.height = 1080;
         this.title = "Mario";
+        EventSystem.addObserver(this);
+    }
+
+    @Override
+    public void onNotify(GameObject object, Event event) {
+        switch (event.type) {
+            case GameEngineStartPlay:
+                this.runtimePlaying = true;
+                currentScene.save();
+                changeScene(new LevelEditorSceneInitializer());
+                break;
+            case GameEngineStopPlay:
+                this.runtimePlaying = false;
+                changeScene(new LevelEditorSceneInitializer());
+                break;
+            case LoadLevel:
+                changeScene(new LevelEditorSceneInitializer());
+                break;
+            case SaveLevel:
+                currentScene.save();
+                break;
+        }
     }
 
     private static final class WindowHolder {
@@ -121,18 +148,13 @@ public final class Window {
         dispose();
     }
 
-    public void changeScene(int index) {
-        switch(index) {
-            case 0:
-                currentScene = new LevelEditorScene();
-                break;
-            case 1:
-                currentScene = new LevelScene();
-                break;
-            default:
-                assert false : "Unknown scene '" + index + "'";
+    public void changeScene(SceneInitializer sceneInitializer) {
+        if (currentScene != null) {
+            currentScene.destroy();
         }
 
+        imGuiLayer.getPropertiesWindow().cleanActiveGameObject();
+        currentScene = new Scene(sceneInitializer);
         currentScene.load();
         currentScene.init();
         currentScene.start();
@@ -146,7 +168,7 @@ public final class Window {
         initWindow();
         this.imGuiLayer = new ImGuiLayer(glfwWindowPtr, pickingTexture);
         imGuiLayer.initImGui();
-        changeScene(0);
+        changeScene(new LevelEditorSceneInitializer());
     }
 
     private void initWindow() {
@@ -245,7 +267,12 @@ public final class Window {
             if (dt > 0) {
                 DebugDraw.draw();
                 Renderer.bindShader(defaultShader);
-                currentScene.update(dt);
+                if (runtimePlaying) {
+                    currentScene.update(dt);
+                } else {
+                    currentScene.editorUpdate(dt);
+                }
+
                 currentScene.render();
             }
             framebuffer.unBind();
@@ -261,8 +288,6 @@ public final class Window {
             dt = endTime - beginTime;
             beginTime = endTime;
         }
-
-        currentScene.saveExit();
     }
 
     private void dispose() {
