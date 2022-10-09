@@ -5,7 +5,9 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 public class Camera {
-    private static final Vector2f projectionSize = new Vector2f(32.0f * 40.0f, 32.0f * 21.0f);
+    private static final int projectionWidth = 6;
+    private static final int projectionHeight = 3;
+    private static final Vector2f projectionSize = new Vector2f(projectionWidth, projectionHeight);
 
     private float zoom = 1.0f;
 

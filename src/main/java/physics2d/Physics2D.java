@@ -53,7 +53,7 @@ public class Physics2D {
             });
 
             gameObject.getComponent(Box2DCollider.class).ifPresent(box2DCollider -> {
-                Vector2f halfSize = box2DCollider.getHalfSize().mul(0.5f);
+                Vector2f halfSize = new Vector2f(box2DCollider.getHalfSize()).mul(0.5f);
                 Vector2f offset = box2DCollider.getOffset();
                 Vector2f origin = box2DCollider.getOrigin();
 

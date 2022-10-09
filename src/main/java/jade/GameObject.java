@@ -4,9 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.google.gson.Gson;
+
 import components.Component;
+import components.ComponentDeserializer;
+import components.SpriteRenderer;
 import components.Transform;
 import imgui.ImGui;
+import renderer.Texture;
+import util.AssetPool;
 
 public class GameObject {
     private static int ID_COUNTER;
@@ -102,6 +108,35 @@ public class GameObject {
 
     public boolean isDoSerialization() {
         return doSerialization;
+    }
+
+    public GameObject copy() {
+        // TODO: Come up with a cleaner solution
+        Gson gson = new Gson()
+                .newBuilder()
+                .registerTypeAdapter(Component.class, new ComponentDeserializer())
+                .registerTypeAdapter(GameObject.class, new GameObjectDeserializer())
+                .create();
+        String json = gson.toJson(this);
+        GameObject gameObject = gson.fromJson(json, GameObject.class);
+        gameObject.generateUid();
+        for(Component c : gameObject.getComponents()) {
+            c.generateId();
+        }
+
+        Optional<SpriteRenderer> maybeRenderer = gameObject.getComponent(SpriteRenderer.class);
+        if (maybeRenderer.isPresent()) {
+            Optional<Texture> maybeTexture = maybeRenderer.get().getTexture();
+            if (maybeTexture.isPresent()) {
+                maybeRenderer.get().setTexture(AssetPool.loadTexture(maybeTexture.get().getFilepath()));
+            }
+        }
+
+        return gameObject;
+    }
+
+    public void generateUid() {
+        this.uid = ID_COUNTER++;
     }
 
     public void destroy() {

@@ -1,8 +1,8 @@
 package util;
 
 public final class Settings {
-    public static final int GRID_WIDTH = 32;
-    public static final int GRID_HEIGHT = 32;
+    public static final float GRID_WIDTH = 0.25f;
+    public static final float GRID_HEIGHT = 0.25f;
 
     private Settings() {}
 }

@@ -73,7 +73,9 @@ public class RenderBatch implements Comparable<RenderBatch> {
     private int maxBatchSize;
     private int zIndex;
 
-    public RenderBatch(int maxBatchSize, int zIndex) {
+    private Renderer renderer;
+
+    public RenderBatch(int maxBatchSize, int zIndex, Renderer renderer) {
         this.maxBatchSize = maxBatchSize;
         this.zIndex = zIndex;
         this.spriteRenderers = new SpriteRenderer[maxBatchSize];
@@ -82,6 +84,9 @@ public class RenderBatch implements Comparable<RenderBatch> {
 
         this.numSprites = 0;
         this.hasRoom = true;
+
+        this.renderer = renderer;
+        System.out.println("zIndex: " + zIndex);
     }
 
     public void start() {
@@ -178,16 +183,16 @@ public class RenderBatch implements Comparable<RenderBatch> {
         // It will generate vertices in this order: top-left, bottom-left, bottom-right, top-left
         //
         // Let's say give position is (0, 0) and scale is (1, 1)
-        // Then the first 4 element of vertices array will be (1, 1), (1, 0), (0, 0), (0, 1)
-        float xAdd = 1.0f;
-        float yAdd = 1.0f;
+        // Then the first 4 element of vertices array will be (0.5, 0.5), (0.5, -0.5), (-0.5, -0.5), (-0.5, 0.5)
+        float xAdd = 0.5f;
+        float yAdd = 0.5f;
         for (int i = 0; i < VERTEX_PER_QUAD; i++) {
             if (i == 1) {
-                yAdd = 0.0f;
+                yAdd = -0.5f;
             } else if (i == 2) {
-                xAdd = 0.0f;
+                xAdd = -0.5f;
             } else if (i == 3) {
-                yAdd = 1.0f;
+                yAdd = 0.5f;
             }
 
             Vector4f currentPos = new Vector4f(spr.gameObject.transform.position.x +
@@ -231,6 +236,13 @@ public class RenderBatch implements Comparable<RenderBatch> {
                 loadVertexProperties(i);
                 spr.setClean();
                 rebufferData = true;
+            }
+
+            // TODO: Get better solution for this
+            if (spr.gameObject.transform.zIndex != this.zIndex) {
+                destroyIfExist(spr);
+                renderer.add(spr.gameObject);
+                i--;
             }
         }
 

@@ -78,7 +78,7 @@ public class PropertiesWindow {
         return Optional.ofNullable(activeGameObject);
     }
 
-    public void cleanActiveGameObject() {
-        this.activeGameObject = null;
+    public void setActiveGameObject(GameObject gameObject) {
+        this.activeGameObject = gameObject;
     }
 }

@@ -9,6 +9,7 @@ import org.joml.Vector4f;
 
 import editor.JImGui;
 import imgui.ImGui;
+import imgui.type.ImInt;
 import jade.GameObject;
 
 public abstract class Component {
@@ -42,7 +43,8 @@ public abstract class Component {
                     field.setAccessible(true);
                 }
 
-                Class<?> type = field.getType();
+                // TODO: Want to fix raw type
+                Class type = field.getType();
                 Object value = field.get(this);
                 String name = field.getName();
 
@@ -72,6 +74,14 @@ public abstract class Component {
                     if (ImGui.dragFloat3(name + ": ", imVec)) {
                         val.set(imVec);
                     }
+                } else if (type.isEnum()) {
+                    String[] enumValues = getEnumValues(type);
+                    String enumType = ((Enum<?>)value).name();
+
+                    ImInt index = new ImInt(indexOf(enumType, enumValues));
+                    if (ImGui.combo(field.getName(), index, enumValues, enumValues.length)) {
+                        field.set(this, type.getEnumConstants()[index.get()]);
+                    }
                 }
 
                 if (isPrivate) {
@@ -96,6 +106,24 @@ public abstract class Component {
 
     public static void init(int maxId) {
         ID_COUNTER = maxId;
+    }
+
+    private <T extends Enum<T>> String[] getEnumValues(Class<T> enumType) {
+        String[] enumValues = new String[enumType.getEnumConstants().length];
+        for (int i = 0; i < enumType.getEnumConstants().length; i++) {
+            enumValues[i] = enumType.getEnumConstants()[i].name();
+        }
+        return enumValues;
+    }
+
+    private int indexOf(String str, String[] arr) {
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i].equals(str)) {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
     public void destroy() {

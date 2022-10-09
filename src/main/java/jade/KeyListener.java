@@ -11,6 +11,7 @@ public final class KeyListener {
     }
 
     private final boolean[] keyPressed = new boolean[GLFW_KEY_LAST + 1];
+    private final boolean[] keyBeginPressed = new boolean[GLFW_KEY_LAST + 1];
 
     private KeyListener() {}
 
@@ -26,12 +27,23 @@ public final class KeyListener {
 
         if (action == GLFW_PRESS) {
             keyPressed[key] = true;
+            keyBeginPressed[key] = true;
         } else if (action == GLFW_RELEASE) {
             keyPressed[key] = false;
+            keyBeginPressed[key] = false;
         }
     }
 
     public boolean isKeyPressed(int key) {
         return keyPressed[key];
+    }
+
+    public boolean keyBeginPress(int key) {
+        boolean result = keyBeginPressed[key];
+        if (result) {
+            keyBeginPressed[key] = false;
+        }
+
+        return result;
     }
 }

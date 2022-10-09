@@ -18,19 +18,19 @@ public class GridLines extends Component {
         Vector2f projectionSize = camera.getProjectionSize();
 
         // -1 means we will move the whole grid bottom left 1 grid unit
-        int firstX = ((int)(cameraPos.x / Settings.GRID_WIDTH) - 1) * Settings.GRID_WIDTH;
-        int firstY = ((int)(cameraPos.y / Settings.GRID_HEIGHT) - 1) * Settings.GRID_HEIGHT;
+        float firstX = ((int)(cameraPos.x / Settings.GRID_WIDTH) - 1) * Settings.GRID_WIDTH;
+        float firstY = ((int)(cameraPos.y / Settings.GRID_HEIGHT) - 1) * Settings.GRID_HEIGHT;
 
         int numVtLines = (int)(projectionSize.x * camera.getZoom() / Settings.GRID_WIDTH) + 2;
         int numHzLines = (int)(projectionSize.y * camera.getZoom() / Settings.GRID_HEIGHT) + 2;
 
-        int width = (int)(projectionSize.x * camera.getZoom()) + Settings.GRID_WIDTH * 2;
-        int height = (int)(projectionSize.y * camera.getZoom()) + Settings.GRID_HEIGHT * 2;
+        float width = (int)(projectionSize.x * camera.getZoom()) + Settings.GRID_WIDTH * 2;
+        float height = (int)(projectionSize.y * camera.getZoom()) + Settings.GRID_HEIGHT * 2;
 
         int maxLines = Math.max(numVtLines, numHzLines);
         for (int i = 0; i < maxLines; i++) {
-            int x = firstX + Settings.GRID_WIDTH * i;
-            int y = firstY + Settings.GRID_HEIGHT * i;
+            float x = firstX + Settings.GRID_WIDTH * i;
+            float y = firstY + Settings.GRID_HEIGHT * i;
 
             if (i < numVtLines) {
                 DebugDraw.drawLine(new Vector2f(x, firstY), new Vector2f(x, firstY + height), defaultColor);
