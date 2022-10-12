@@ -9,14 +9,22 @@ import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 import static org.lwjgl.glfw.GLFW.glfwGetCurrentContext;
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.glClear;
+import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.glViewport;
+import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
+import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 
 import editor.GameViewWindow;
 import editor.MenuBar;
 import editor.PropertiesWindow;
+import editor.SceneHierarchyWindow;
 import imgui.ImFontAtlas;
 import imgui.ImFontConfig;
 import imgui.ImGui;
 import imgui.ImGuiIO;
+import imgui.ImGuiViewport;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.flag.ImGuiFreeTypeBuilderFlags;
@@ -36,12 +44,14 @@ public class ImGuiLayer {
     private GameViewWindow gameViewWindow;
     private PropertiesWindow propertiesWindow;
     private MenuBar menuBar;
+    private SceneHierarchyWindow sceneHierarchyWindow;
 
     public ImGuiLayer(long glfwWindowPtr, PickingTexture pickingTexture) {
         this.glfwWindowPtr = glfwWindowPtr;
         this.gameViewWindow = new GameViewWindow();
         this.propertiesWindow = new PropertiesWindow(pickingTexture);
         this.menuBar = new MenuBar();
+        this.sceneHierarchyWindow = new SceneHierarchyWindow();
     }
 
     public void initImGui() {
@@ -88,7 +98,7 @@ public class ImGuiLayer {
             }
         });
 
-        imGuiGlfw.init(glfwWindowPtr, true);
+        imGuiGlfw.init(glfwWindowPtr, false);
         imGuiGl3.init("#version 330 core");
     }
 
@@ -97,9 +107,7 @@ public class ImGuiLayer {
     }
 
     public void update(double deltaTime, Scene currentScene) {
-        // ImGui Start frame
-        imGuiGlfw.newFrame();
-        ImGui.newFrame();
+        startFrame(deltaTime);
 
         setupDockSpace();
         currentScene.imGui();
@@ -107,10 +115,22 @@ public class ImGuiLayer {
 
         propertiesWindow.update(deltaTime, currentScene);
         propertiesWindow.imGui();
+        sceneHierarchyWindow.imGui();
 
-        menuBar.imGui();
+        endFrame();
+    }
 
-        ImGui.end();
+    private void startFrame(double deltaTime) {
+        imGuiGlfw.newFrame();
+        ImGui.newFrame();
+    }
+
+    private void endFrame() {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, Window.get().getWidth(), Window.get().getHeight());
+        glClearColor(0,0,0, 1);
+        glClear(GL_COLOR_BUFFER_BIT);
+
         ImGui.render();
         imGuiGl3.renderDrawData(ImGui.getDrawData());
 
@@ -120,7 +140,6 @@ public class ImGuiLayer {
             ImGui.renderPlatformWindowsDefault();
             glfwMakeContextCurrent(backupWindowPtr);
         }
-
     }
 
     public void dispose() {
@@ -131,6 +150,10 @@ public class ImGuiLayer {
 
     private void setupDockSpace() {
         int windowFlags = ImGuiWindowFlags.MenuBar | ImGuiWindowFlags.NoDocking;
+        ImGuiViewport imGuiViewport = ImGui.getMainViewport();
+        ImGui.setNextWindowPos(imGuiViewport.getWorkPosX(), imGuiViewport.getWorkPosY());
+        ImGui.setNextWindowSize(imGuiViewport.getWorkSizeX(), imGuiViewport.getWorkSizeY());
+        ImGui.setNextWindowViewport(imGuiViewport.getID());
 
         ImGui.setNextWindowPos(0.0f, 0.0f, ImGuiCond.Always);
         ImGui.setNextWindowSize(Window.get().getWidth(), Window.get().getHeight());
@@ -145,6 +168,8 @@ public class ImGuiLayer {
         ImGui.popStyleVar(2);
 
         ImGui.dockSpace(ImGui.getID("Docksapce"));
-    }
 
+        menuBar.imGui();
+        ImGui.end();
+    }
 }

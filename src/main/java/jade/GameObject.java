@@ -98,6 +98,10 @@ public class GameObject {
         return this.uid;
     }
 
+    public String getName() {
+        return this.name;
+    }
+
     public List<Component> getComponents() {
         return this.components;
     }

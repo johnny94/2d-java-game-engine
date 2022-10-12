@@ -86,7 +86,6 @@ public class RenderBatch implements Comparable<RenderBatch> {
         this.hasRoom = true;
 
         this.renderer = renderer;
-        System.out.println("zIndex: " + zIndex);
     }
 
     public void start() {
