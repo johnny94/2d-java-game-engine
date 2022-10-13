@@ -98,7 +98,7 @@ public class ImGuiLayer {
             }
         });
 
-        imGuiGlfw.init(glfwWindowPtr, false);
+        imGuiGlfw.init(glfwWindowPtr, true);
         imGuiGl3.init("#version 330 core");
     }
 

@@ -39,6 +39,8 @@ public class Transform extends Component {
 
     @Override
     public void imGui() {
+        // Maybe this can be move to GameObject#imGui
+        gameObject.name = JImGui.inputText("Name", gameObject.name);
         JImGui.drawVec2Control("Position", this.position);
         JImGui.drawVec2Control("Scale", this.scale, 32.0f);
         this.rotation = JImGui.drawFloat("Rotation", this.rotation);

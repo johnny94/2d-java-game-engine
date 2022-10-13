@@ -6,6 +6,7 @@ import org.joml.Vector4f;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiStyleVar;
+import imgui.type.ImString;
 
 public class JImGui {
     private static final float DEFAULT_COLUMN_WIDTH = 220.0f;
@@ -127,5 +128,26 @@ public class JImGui {
         ImGui.popID();
 
         return result;
+    }
+
+    public static String inputText(String label, String text) {
+        ImGui.pushID(label);
+
+        ImGui.columns(2);
+        ImGui.setColumnWidth(0, DEFAULT_COLUMN_WIDTH);
+        ImGui.text(label);
+        ImGui.nextColumn();
+
+        ImString result = new ImString(text, 256);
+        if (ImGui.inputText("##" + label, result)) {
+            ImGui.columns(1);
+            ImGui.popID();
+            return result.get();
+        }
+
+        ImGui.columns(1);
+        ImGui.popID();
+
+        return text;
     }
 }

@@ -18,7 +18,7 @@ public class GameObject {
     private static int ID_COUNTER;
     private int uid = -1;
 
-    private final String name;
+    public String name;
     private final List<Component> components = new ArrayList<>();
     public transient Transform transform;
     private boolean doSerialization = true;
@@ -96,10 +96,6 @@ public class GameObject {
 
     public int getUid() {
         return this.uid;
-    }
-
-    public String getName() {
-        return this.name;
     }
 
     public List<Component> getComponents() {
