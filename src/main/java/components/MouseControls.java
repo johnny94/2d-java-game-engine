@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.joml.Vector4f;
 
+import components.animation.StateMachine;
 import jade.GameObject;
 import jade.KeyListener;
 import jade.MouseListener;
@@ -34,6 +35,8 @@ public class MouseControls extends Component {
 
     public void place() {
         GameObject go = this.holdingObject.copy();
+        go.getComponent(StateMachine.class).ifPresent(StateMachine::refreshTexture);
+
         Optional<SpriteRenderer> maybeRenderer = go.getComponent(SpriteRenderer.class);
         if (maybeRenderer.isPresent()) {
             maybeRenderer.get().setColor(new Vector4f(1, 1, 1, 1));

@@ -131,4 +131,14 @@ public class Texture {
                oTex.getTextureId() == this.textureId &&
                oTex.getFilepath().equals(this.getFilepath());
     }
+
+    @Override
+    public String toString() {
+        return "Texture{" +
+               "filepath='" + filepath + '\'' +
+               ", textureId=" + textureId +
+               ", width=" + width +
+               ", height=" + height +
+               '}';
+    }
 }
