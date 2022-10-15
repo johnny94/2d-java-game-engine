@@ -25,7 +25,6 @@ import imgui.ImFontConfig;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.ImGuiViewport;
-import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.flag.ImGuiFreeTypeBuilderFlags;
 import imgui.flag.ImGuiStyleVar;
@@ -155,7 +154,7 @@ public class ImGuiLayer {
         ImGui.setNextWindowSize(imGuiViewport.getWorkSizeX(), imGuiViewport.getWorkSizeY());
         ImGui.setNextWindowViewport(imGuiViewport.getID());
 
-        ImGui.setNextWindowPos(0.0f, 0.0f, ImGuiCond.Always);
+        ImGui.setNextWindowPos(0.0f, 0.0f);
         ImGui.setNextWindowSize(Window.get().getWidth(), Window.get().getHeight());
         ImGui.pushStyleVar(ImGuiStyleVar.WindowRounding, 0.0f);
         ImGui.pushStyleVar(ImGuiStyleVar.WindowBorderSize, 0.0f);

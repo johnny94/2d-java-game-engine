@@ -138,8 +138,7 @@ public class Gizmo extends Component {
     }
 
     private boolean checkXHoverState() {
-        Vector2f mousePos = new Vector2f(MouseListener.getInstance().getOrthoX(),
-                                         MouseListener.getInstance().getOrthoY());
+        Vector2f mousePos = MouseListener.getInstance().getWorld();
 
         if (mousePos.x <= xAxisObject.transform.position.x + (gizmoHeight / 2.0f) &&
             mousePos.x >= xAxisObject.transform.position.x - (gizmoWidth /2.0f) &&
@@ -154,8 +153,7 @@ public class Gizmo extends Component {
     }
 
     private boolean checkYHoverState() {
-        Vector2f mousePos = new Vector2f(MouseListener.getInstance().getOrthoX(),
-                                         MouseListener.getInstance().getOrthoY());
+        Vector2f mousePos = MouseListener.getInstance().getWorld();
 
         if (mousePos.x <= yAxisObject.transform.position.x + (gizmoWidth /2.0f)&&
             mousePos.x >= yAxisObject.transform.position.x - (gizmoWidth /2.0f) &&

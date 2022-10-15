@@ -15,8 +15,8 @@ public final class MouseListener {
 
     private double scrollX;
     private double scrollY;
-    private double xPos, yPos, xLast, yLast;
-    private double worldX, worldY, lastWorldX, lastWorldY;
+    private double xPos, yPos;
+    private double worldX, worldY;
 
     private int mouseButtonDown;
 
@@ -37,15 +37,8 @@ public final class MouseListener {
             isDragging = true;
         }
 
-        this.xLast = this.xPos;
-        this.yLast = this.yPos;
-        this.lastWorldX = this.worldX;
-        this.lastWorldY = this.worldY;
         this.xPos = xPos;
         this.yPos = yPos;
-
-        calOrthoX();
-        calOrthoY();
     }
 
     public void mouseButtonCallback(long window, int button, int action, int mods) {
@@ -75,10 +68,6 @@ public final class MouseListener {
     public void endFrame() {
         this.scrollX = 0;
         this.scrollY = 0;
-        this.xLast = this.xPos;
-        this.yLast = this.yPos;
-        this.lastWorldX = this.worldX;
-        this.lastWorldY = this.worldY;
     }
 
     public float getX() {
@@ -98,31 +87,18 @@ public final class MouseListener {
         return currentY;
     }
 
-    public float getOrthoX() {
-        return (float) worldX;
+    public float getWorldX() {
+        return getWorld().x;
     }
 
-    private void calOrthoX() {
+    public float getWorldY() {
+        return getWorld().y;
+    }
+
+    public Vector2f getWorld() {
         float currentX = getX() - gameViewportPos.x;
+        currentX = (currentX / gameViewportSize.x) * 2.0f - 1.0f;  // Convert to NDC
 
-        // Convert to NDC
-        currentX = (currentX / gameViewportSize.x) * 2.0f - 1.0f;
-
-        Camera camera = Window.get().getCurrentScene().getCamera();
-        Matrix4f viewProjection = new Matrix4f();
-        camera.getInverseViewMatrix().mul(camera.getInverseProjectionMatrix(), viewProjection);
-
-        Vector4f tmp = new Vector4f(currentX, 0, 0, 1);
-        tmp.mul(viewProjection);
-
-        this.worldX = tmp.x;
-    }
-
-    public float getOrthoY() {
-        return (float) worldY;
-    }
-
-    private void calOrthoY() {
         float currentY = getY() - gameViewportPos.y;
 
         // Convert to NDC
@@ -130,33 +106,17 @@ public final class MouseListener {
         currentY = -((currentY / gameViewportSize.y) * 2.0f - 1.0f);
 
         Camera camera = Window.get().getCurrentScene().getCamera();
-        Matrix4f viewProjection = new Matrix4f();
-        camera.getInverseViewMatrix().mul(camera.getInverseProjectionMatrix(), viewProjection);
+        Matrix4f inverseView = new Matrix4f(camera.getInverseViewMatrix());
+        Matrix4f inverseProjection = new Matrix4f(camera.getInverseProjectionMatrix());
 
-        Vector4f tmp = new Vector4f(0, currentY, 0, 1);
-        tmp.mul(viewProjection);
+        Vector4f tmp = new Vector4f(currentX, currentY, 0, 1);
+        tmp.mul(inverseView.mul(inverseProjection));
 
-        this.worldY = tmp.y;
+        return new Vector2f(tmp.x, tmp.y);
     }
 
     public float getY() {
         return (float)yPos;
-    }
-
-    public float getDeltaX() {
-        return (float)(xLast - xPos);
-    }
-
-    public float getWorldDeltaX() {
-        return (float)(lastWorldX - worldX);
-    }
-
-    public float getDeltaY() {
-        return (float)(yLast - yPos);
-    }
-
-    public float getWorldDeltaY() {
-        return (float)(lastWorldY - worldY);
     }
 
     public float getScrollX() {

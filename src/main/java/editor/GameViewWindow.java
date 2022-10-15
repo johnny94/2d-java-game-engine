@@ -33,25 +33,24 @@ public class GameViewWindow {
         ImGui.endMenuBar();
 
 
+        ImGui.setCursorPos(ImGui.getCursorPosX(), ImGui.getCursorPosY());
         ImVec2 windowSize = getLargestSizeForViewPort();
         ImVec2 windowPos = getCenteredPositionForViewport(windowSize);
-
         ImGui.setCursorPos(windowPos.x, windowPos.y);
-        ImVec2 topLeft = new ImVec2();
-        ImGui.getCursorScreenPos(topLeft);
-        topLeft.x -= ImGui.getScrollX();
-        topLeft.y -= ImGui.getScrollY();
-        leftX = topLeft.x;
-        bottomY = topLeft.y; // The coordinate between ImGui and openGL is inverse.
-        rightX = topLeft.x + windowSize.x;
-        topY = bottomY + windowSize.y;
 
-        MouseListener.getInstance().setGameViewportPos(new Vector2f(topLeft.x, topLeft.y));
-        MouseListener.getInstance().setGameViewportSize(new Vector2f(windowSize.x, windowSize.y));
+        leftX = windowPos.x + 10;
+        bottomY = windowPos.y; // The coordinate between ImGui and openGL is inverse.
+        rightX = windowPos.x + windowSize.x + 10;
+        topY = windowPos.y + windowSize.y;
 
 
         int texture2d = Window.get().getFramebuffer().getTextureId();
         ImGui.image(texture2d, windowSize.x, windowSize.y, 0, 1, 1, 0);
+
+        // TODO: The result is different from the video "#44 Even More Bug Fixing 17:41"
+        MouseListener.getInstance().setGameViewportPos(new Vector2f(windowPos.x + 10, windowPos.y));
+        MouseListener.getInstance().setGameViewportSize(new Vector2f(windowSize.x, windowSize.y));
+
 
         ImGui.end();
     }
@@ -61,7 +60,8 @@ public class GameViewWindow {
     }
 
     private ImVec2 getLargestSizeForViewPort() {
-        ImVec2 windowSize = getWindowSize();
+        ImVec2 windowSize = new ImVec2();
+        ImGui.getContentRegionAvail(windowSize);
 
         float aspectWidth = windowSize.x;
         float aspectHeight = aspectWidth / Window.get().getTargetAspectRatio();
@@ -75,20 +75,13 @@ public class GameViewWindow {
     }
 
     private ImVec2 getCenteredPositionForViewport(ImVec2 aspectSize) {
-        ImVec2 windowSize = getWindowSize();
+        ImVec2 windowSize = new ImVec2();
+        ImGui.getContentRegionAvail(windowSize);
+
         float viewportX = (windowSize.x / 2.0f) - (aspectSize.x / 2.0f);
         float viewportY = (windowSize.y / 2.0f) - (aspectSize.y / 2.0f);
 
         return new ImVec2(viewportX + ImGui.getCursorPosX(),
                           viewportY + ImGui.getCursorPosY());
-    }
-
-    private ImVec2 getWindowSize() {
-        ImVec2 windowSize = new ImVec2();
-        ImGui.getContentRegionAvail(windowSize);
-        windowSize.x -= ImGui.getScrollX();
-        windowSize.y -= ImGui.getScrollY();
-
-        return windowSize;
     }
 }

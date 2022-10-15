@@ -27,7 +27,7 @@ public class PropertiesWindow {
     public void update(double deltaTime, Scene currentScene) {
         deBounce -= deltaTime;
 
-        if (MouseListener.getInstance().isPressed(GLFW_MOUSE_BUTTON_LEFT) && deBounce < 0) {
+        if (!MouseListener.getInstance().isDragging() && MouseListener.getInstance().isPressed(GLFW_MOUSE_BUTTON_LEFT) && deBounce < 0) {
             int x = (int)MouseListener.getInstance().getScreenX();
             int y = (int)MouseListener.getInstance().getScreenY();
             int gameObjectUid = pickingTexture.readPixel(x, y);
