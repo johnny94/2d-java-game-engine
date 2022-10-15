@@ -1,10 +1,14 @@
 package util;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import components.SpriteSheet;
+import jade.Sound;
 import renderer.Shader;
 import renderer.Texture;
 
@@ -12,6 +16,7 @@ public final class AssetPool {
     private static final Map<String, Shader> shaders = new HashMap<>();
     private static final Map<String, Texture> textures = new HashMap<>();
     private static final Map<String, SpriteSheet> spriteSheets = new HashMap<>();
+    private static final Map<Path, Sound> sounds = new HashMap<>();
 
     private AssetPool() { }
 
@@ -54,5 +59,29 @@ public final class AssetPool {
         }
 
         return spriteSheets.getOrDefault(f.getAbsolutePath(), null);
+    }
+
+    public static Collection<Sound> getAllSounds() {
+        return sounds.values();
+    }
+
+    public static Sound getSound(String resourcePath) {
+        Path path = Paths.get(resourcePath).toAbsolutePath();
+        Sound sound = sounds.get(path);
+        if (sound == null) {
+            assert false : "Sound file not added '" + resourcePath + "' and it has not been added to asset pool.";
+        }
+
+        return sound;
+    }
+
+    public static Sound addSound(String resourcePath, boolean loops) {
+        Path path = Paths.get(resourcePath).toAbsolutePath();
+        Sound sound = sounds.get(path);
+        if (sound == null) {
+            return sounds.put(path, new Sound(resourcePath, loops));
+        }
+
+        return sound;
     }
 }

@@ -1,5 +1,7 @@
 package scenes;
 
+import java.nio.file.Path;
+
 import org.joml.Vector2f;
 
 import components.EditorCamera;
@@ -14,6 +16,7 @@ import imgui.ImGui;
 import imgui.ImVec2;
 import jade.GameObject;
 import jade.Prefabs;
+import jade.Sound;
 import util.AssetPool;
 import util.Settings;
 
@@ -54,6 +57,22 @@ public class LevelEditorSceneInitializer extends SceneInitializer {
                                                   24, 48, 3, 0));
         AssetPool.loadTexture("assets/images/green.png");
 
+        AssetPool.addSound("assets/sounds/main-theme-overworld.ogg", true);
+        AssetPool.addSound("assets/sounds/flagpole.ogg", false);
+        AssetPool.addSound("assets/sounds/break_block.ogg", false);
+        AssetPool.addSound("assets/sounds/bump.ogg", false);
+        AssetPool.addSound("assets/sounds/coin.ogg", false);
+        AssetPool.addSound("assets/sounds/gameover.ogg", false);
+        AssetPool.addSound("assets/sounds/jump-small.ogg", false);
+        AssetPool.addSound("assets/sounds/mario_die.ogg", false);
+        AssetPool.addSound("assets/sounds/pipe.ogg", false);
+        AssetPool.addSound("assets/sounds/powerup.ogg", false);
+        AssetPool.addSound("assets/sounds/powerup_appears.ogg", false);
+        AssetPool.addSound("assets/sounds/stage_clear.ogg", false);
+        AssetPool.addSound("assets/sounds/stomp.ogg", false);
+        AssetPool.addSound("assets/sounds/kick.ogg", false);
+        AssetPool.addSound("assets/sounds/invincible.ogg", false);
+
         // Note: I think this should be done when deserialize the Texture.
         for (GameObject go : scene.getGameObjects()) {
             go.getComponent(SpriteRenderer.class)
@@ -80,6 +99,7 @@ public class LevelEditorSceneInitializer extends SceneInitializer {
 
             blockTab();
             prefabTab();
+            soundTab();
 
             ImGui.endTabBar();
         }
@@ -152,6 +172,27 @@ public class LevelEditorSceneInitializer extends SceneInitializer {
                                  .ifPresent(m -> m.pickUpObject(go));
             }
             ImGui.sameLine();
+
+            ImGui.endTabItem();
+        }
+    }
+
+    private void soundTab() {
+        if (ImGui.beginTabItem("Sounds")) {
+            for (Sound sound : AssetPool.getAllSounds()) {
+                Path path = sound.getFilepath();
+                if (ImGui.button(path.getFileName().toString())) {
+                    if (!sound.isPlaying()) {
+                        sound.play();
+                    } else {
+                      sound.stop();
+                    }
+                }
+
+                if (ImGui.getContentRegionAvailX() > 100) {
+                    ImGui.sameLine();
+                }
+            }
 
             ImGui.endTabItem();
         }

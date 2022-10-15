@@ -22,7 +22,6 @@ import static org.lwjgl.glfw.GLFW.glfwSetCursorPosCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetErrorCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
-import static org.lwjgl.glfw.GLFW.glfwSetScrollCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowSizeCallback;
 import static org.lwjgl.glfw.GLFW.glfwShowWindow;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
@@ -30,6 +29,13 @@ import static org.lwjgl.glfw.GLFW.glfwSwapInterval;
 import static org.lwjgl.glfw.GLFW.glfwTerminate;
 import static org.lwjgl.glfw.GLFW.glfwWindowHint;
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
+import static org.lwjgl.openal.ALC10.ALC_DEFAULT_DEVICE_SPECIFIER;
+import static org.lwjgl.openal.ALC10.alcCloseDevice;
+import static org.lwjgl.openal.ALC10.alcCreateContext;
+import static org.lwjgl.openal.ALC10.alcDestroyContext;
+import static org.lwjgl.openal.ALC10.alcGetString;
+import static org.lwjgl.openal.ALC10.alcMakeContextCurrent;
+import static org.lwjgl.openal.ALC10.alcOpenDevice;
 import static org.lwjgl.opengl.GL11.GL_BLEND;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
@@ -48,6 +54,10 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.openal.AL;
+import org.lwjgl.openal.ALC;
+import org.lwjgl.openal.ALCCapabilities;
+import org.lwjgl.openal.ALCapabilities;
 import org.lwjgl.opengl.GL;
 
 import observers.EventSystem;
@@ -82,6 +92,10 @@ public final class Window implements Observer {
 
     // ImGui
     private ImGuiLayer imGuiLayer;
+
+    // Audio
+    private long audioContext;
+    private long audioDevice;
 
     private Window() {
         this.width = 1920;
@@ -194,7 +208,6 @@ public final class Window implements Observer {
         // Set callbacks
         glfwSetCursorPosCallback(glfwWindowPtr, mouseListener::mousePosCallback);
         glfwSetMouseButtonCallback(glfwWindowPtr, mouseListener::mouseButtonCallback);
-        glfwSetScrollCallback(glfwWindowPtr, mouseListener::mouseScrollCallback);
         glfwSetKeyCallback(glfwWindowPtr, keyListener::keyCallback);
         glfwSetWindowSizeCallback(glfwWindowPtr, (window, width, height) -> {
             this.width = width;
@@ -207,6 +220,22 @@ public final class Window implements Observer {
         glfwSwapInterval(1);
 
         glfwShowWindow(glfwWindowPtr);
+
+        // Initialize the audio device
+        String defaultDeviceName = alcGetString(0, ALC_DEFAULT_DEVICE_SPECIFIER);
+        audioDevice = alcOpenDevice(defaultDeviceName);
+
+        int[] attributes = {0};
+        audioContext = alcCreateContext(audioDevice, attributes);
+        alcMakeContextCurrent(audioContext);
+
+        ALCCapabilities alcCapabilities = ALC.createCapabilities(audioDevice);
+        ALCapabilities alCapabilities = AL.createCapabilities(alcCapabilities);
+
+        if (!alCapabilities.OpenAL10) {
+            assert false : "Audio library not supported.";
+        }
+
 
         // This line is critical for LWJGL's interoperation with GLFW's
         // OpenGL context, or any context that is managed externally.
@@ -292,7 +321,13 @@ public final class Window implements Observer {
 
     private void dispose() {
         imGuiLayer.dispose();
+        disposeAudio();
         disposeWindow();
+    }
+
+    private void disposeAudio() {
+        alcDestroyContext(audioContext);
+        alcCloseDevice(audioDevice);
     }
 
     private void disposeWindow() {
