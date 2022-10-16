@@ -56,6 +56,7 @@ public class ImGuiLayer {
 
     public void initImGui() {
         ImGui.createContext();
+
         ImGuiIO io = ImGui.getIO();
         io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
         io.setConfigFlags(ImGuiConfigFlags.DockingEnable);
@@ -93,7 +94,7 @@ public class ImGuiLayer {
                 ImGui.setWindowFocus(null);
             }
 
-            if (!io.getWantCaptureMouse() || gameViewWindow.getWantCaptureMouse()) {
+            if (gameViewWindow.getWantCaptureMouse()) {
                 MouseListener.getInstance().mouseButtonCallback(w, button, action, mods);
             }
         });
@@ -104,6 +105,8 @@ public class ImGuiLayer {
 
             if (!io.getWantCaptureMouse() || gameViewWindow.getWantCaptureMouse()) {
                 MouseListener.getInstance().mouseScrollCallback(w, xOffset, yOffset);
+            } else {
+                MouseListener.getInstance().clear();
             }
         });
 
@@ -122,7 +125,6 @@ public class ImGuiLayer {
         currentScene.imGui();
         gameViewWindow.imgui();
 
-        propertiesWindow.update(deltaTime, currentScene);
         propertiesWindow.imGui();
         sceneHierarchyWindow.imGui();
 
@@ -159,6 +161,7 @@ public class ImGuiLayer {
 
     private void setupDockSpace() {
         int windowFlags = ImGuiWindowFlags.MenuBar | ImGuiWindowFlags.NoDocking;
+
         ImGuiViewport imGuiViewport = ImGui.getMainViewport();
         ImGui.setNextWindowPos(imGuiViewport.getWorkPosX(), imGuiViewport.getWorkPosY());
         ImGui.setNextWindowSize(imGuiViewport.getWorkSizeX(), imGuiViewport.getWorkSizeY());
@@ -180,5 +183,9 @@ public class ImGuiLayer {
 
         menuBar.imGui();
         ImGui.end();
+    }
+
+    public GameViewWindow getGameViewWindow() {
+        return this.gameViewWindow;
     }
 }

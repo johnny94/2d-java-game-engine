@@ -294,7 +294,7 @@ public final class Window implements Observer {
 
             // NOTE: Maybe It will be better to merge update and sceneImGui method?
             if (dt > 0) {
-                DebugDraw.draw();
+
                 Renderer.bindShader(defaultShader);
                 if (runtimePlaying) {
                     currentScene.update(dt);
@@ -303,6 +303,7 @@ public final class Window implements Observer {
                 }
 
                 currentScene.render();
+                DebugDraw.draw();
             }
             framebuffer.unBind();
 

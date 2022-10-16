@@ -1,48 +1,28 @@
 package editor;
 
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
-
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
-import components.NonPickable;
 import imgui.ImGui;
 import jade.GameObject;
-import jade.MouseListener;
 import physics2d.components.Box2DCollider;
 import physics2d.components.CircleCollider;
 import physics2d.components.RigidBody2D;
 import renderer.PickingTexture;
-import scenes.Scene;
 
 public class PropertiesWindow {
+    private List<GameObject> activeGameObjects = new ArrayList<>();
     private GameObject activeGameObject;
     private PickingTexture pickingTexture;
-
-    private float deBounce = 0.2f;
 
     public PropertiesWindow(PickingTexture pickingTexture) {
         this.pickingTexture = pickingTexture;
     }
 
-    public void update(double deltaTime, Scene currentScene) {
-        deBounce -= deltaTime;
-
-        if (!MouseListener.getInstance().isDragging() && MouseListener.getInstance().isPressed(GLFW_MOUSE_BUTTON_LEFT) && deBounce < 0) {
-            int x = (int)MouseListener.getInstance().getScreenX();
-            int y = (int)MouseListener.getInstance().getScreenY();
-            int gameObjectUid = pickingTexture.readPixel(x, y);
-            Optional<GameObject> pick = currentScene.getGameObject(gameObjectUid);
-            if (pick.isPresent() && !pick.get().getComponent(NonPickable.class).isPresent()) {
-                activeGameObject = pick.get();
-            } else if (!pick.isPresent() && !MouseListener.getInstance().isDragging()) {
-                activeGameObject = null;
-            }
-            this.deBounce = 0.2f;
-        }
-    }
-
     public void imGui() {
-        if (activeGameObject != null) {
+        if (activeGameObjects.size() == 1 && activeGameObjects.get(0) != null) {
+            activeGameObject = activeGameObjects.get(0);
             ImGui.begin("Properties");
 
             if (ImGui.beginPopupContextWindow("ComponentAdder")) {
@@ -75,10 +55,31 @@ public class PropertiesWindow {
     }
 
     public Optional<GameObject> getActiveGameObject() {
-        return Optional.ofNullable(activeGameObject);
+        return activeGameObjects.size() == 1 ? Optional.ofNullable(activeGameObject) : Optional.empty();
+    }
+
+    public List<GameObject> getActiveGameObjects() {
+        return this.activeGameObjects;
+    }
+
+    public void clearSelected() {
+        this.activeGameObjects.clear();
     }
 
     public void setActiveGameObject(GameObject gameObject) {
-        this.activeGameObject = gameObject;
+        if (gameObject != null) {
+            clearSelected();
+            this.activeGameObjects.add(gameObject);
+        }
+    }
+
+    public void addActiveGameObject(GameObject gameObject) {
+        if (gameObject != null) {
+            this.activeGameObjects.add(gameObject);
+        }
+    }
+
+    public PickingTexture getPickingTexture() {
+        return this.pickingTexture;
     }
 }

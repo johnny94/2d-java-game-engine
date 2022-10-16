@@ -1,8 +1,5 @@
 package components;
 
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_K;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_CONTROL;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 
 import org.joml.Vector2f;
@@ -10,7 +7,6 @@ import org.joml.Vector4f;
 
 import editor.PropertiesWindow;
 import jade.GameObject;
-import jade.KeyListener;
 import jade.MouseListener;
 import jade.Prefabs;
 import jade.Window;
@@ -85,22 +81,6 @@ public class Gizmo extends Component {
         if (this.propertiesWindow.getActiveGameObject().isPresent()) {
             this.activeGameObject = this.propertiesWindow.getActiveGameObject().get();
             setActive();
-
-            // TODO: Move this its own keyEditorBinding component class
-            KeyListener keyListener = KeyListener.getInstance();
-            if (keyListener.isKeyPressed(GLFW_KEY_LEFT_CONTROL) &&
-                keyListener.keyBeginPress(GLFW_KEY_D)) {
-                GameObject newObject = activeGameObject.copy();
-                Window.get().getCurrentScene().addGameObject(newObject);
-                newObject.transform.position.add(0.1f, 0.1f);
-                this.propertiesWindow.setActiveGameObject(newObject);
-                return;
-            } else if (keyListener.isKeyPressed(GLFW_KEY_K)) {
-                activeGameObject.destroy();
-                this.setInactive();
-                propertiesWindow.setActiveGameObject(null);
-                return;
-            }
         } else {
             setInactive();
             return;

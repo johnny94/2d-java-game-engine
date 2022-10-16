@@ -4,6 +4,8 @@ import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LAST;
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 
+import java.util.Arrays;
+
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
@@ -16,7 +18,6 @@ public final class MouseListener {
     private double scrollX;
     private double scrollY;
     private double xPos, yPos;
-    private double worldX, worldY;
 
     private int mouseButtonDown;
 
@@ -33,6 +34,10 @@ public final class MouseListener {
     }
 
     public void mousePosCallback(long window, double xPos, double yPos) {
+        if (!Window.get().getImGuiLayer().getGameViewWindow().getWantCaptureMouse()) {
+            clear();
+        }
+
         if (mouseButtonDown > 0) {
             isDragging = true;
         }
@@ -70,21 +75,67 @@ public final class MouseListener {
         this.scrollY = 0;
     }
 
+    public void clear() {
+        this.scrollX = 0;
+        this.scrollY = 0;
+        this.xPos = 0;
+        this.yPos = 0;
+        this.mouseButtonDown = 0;
+        this.isDragging = false;
+        Arrays.fill(mouseButtonPressed, false);
+    }
+
     public float getX() {
         return (float)xPos;
     }
 
-    // ? What's this value
+    public Vector2f screenToWorld(Vector2f screenCoords) {
+        Vector2f normalizedScreenCoords = new Vector2f(
+                screenCoords.x / 3840,
+                screenCoords.y / 2160
+        );
+
+        // To [-1, 1] range
+        normalizedScreenCoords.mul(2).sub(new Vector2f(1, 1));
+        Camera camera = Window.get().getCurrentScene().getCamera();
+        Vector4f tmp = new Vector4f(normalizedScreenCoords.x, normalizedScreenCoords.y, 0, 1);
+        Matrix4f inverseView = new Matrix4f(camera.getInverseViewMatrix());
+        Matrix4f inverseProjection = new Matrix4f(camera.getInverseProjectionMatrix());
+        tmp.mul(inverseView.mul(inverseProjection));
+
+        return new Vector2f(tmp.x, tmp.y);
+    }
+
+    public Vector2f worldToScreen(Vector2f worldCoords) {
+        Camera camera = Window.get().getCurrentScene().getCamera();
+
+        Vector4f ndcSpacePos = new Vector4f(worldCoords.x, worldCoords.y, 0, 1);
+        Matrix4f view = new Matrix4f(camera.getViewMatrix());
+        Matrix4f projection = new Matrix4f(camera.getProjectionMatrix());
+        ndcSpacePos.mul(projection.mul(view));
+
+        Vector2f windowSpace = new Vector2f(ndcSpacePos.x, ndcSpacePos.y).mul(1.0f / ndcSpacePos.w);
+        windowSpace.add(new Vector2f(1.0f, 1.0f)).mul(0.5f);
+        windowSpace.mul(new Vector2f(Window.get().getWidth(), Window.get().getHeight()));
+
+        return windowSpace;
+    }
+
     public float getScreenX() {
-        float currentX = getX() - gameViewportPos.x;
-        currentX = (currentX / gameViewportSize.x) * 3840.0f; // TODO: Hardcoded
-        return currentX;
+        return getScreen().x;
     }
 
     public float getScreenY() {
+        return getScreen().y;
+    }
+
+    public Vector2f getScreen() {
+        float currentX = getX() - gameViewportPos.x;
+        currentX = (currentX / gameViewportSize.x) * 3840.0f; // TODO: Hardcoded
         float currentY = getY() - gameViewportPos.y;
         currentY = 2160.0f - ((currentY / gameViewportSize.y) * 2160.0f); // TODO: Hardcoded
-        return currentY;
+
+        return new Vector2f(currentX, currentY);
     }
 
     public float getWorldX() {

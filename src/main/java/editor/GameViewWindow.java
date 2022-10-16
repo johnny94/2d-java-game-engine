@@ -32,7 +32,6 @@ public class GameViewWindow {
         }
         ImGui.endMenuBar();
 
-
         ImGui.setCursorPos(ImGui.getCursorPosX(), ImGui.getCursorPosY());
         ImVec2 windowSize = getLargestSizeForViewPort();
         ImVec2 windowPos = getCenteredPositionForViewport(windowSize);
@@ -83,5 +82,6 @@ public class GameViewWindow {
 
         return new ImVec2(viewportX + ImGui.getCursorPosX(),
                           viewportY + ImGui.getCursorPosY());
+
     }
 }

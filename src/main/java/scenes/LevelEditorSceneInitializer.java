@@ -7,6 +7,7 @@ import org.joml.Vector2f;
 import components.EditorCamera;
 import components.GizmoManager;
 import components.GridLines;
+import components.KeyControls;
 import components.MouseControls;
 import components.Sprite;
 import components.SpriteRenderer;
@@ -32,6 +33,7 @@ public class LevelEditorSceneInitializer extends SceneInitializer {
         levelEditorObject = scene.createGameObject("LevelEditor");
         levelEditorObject.setNoSerialize();
         levelEditorObject.addComponent(new MouseControls());
+        levelEditorObject.addComponent(new KeyControls());
         levelEditorObject.addComponent(new GridLines());
         levelEditorObject.addComponent(new EditorCamera(scene.getCamera()));
         levelEditorObject.addComponent(new GizmoManager(gizmos));
