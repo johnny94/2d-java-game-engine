@@ -12,8 +12,8 @@ import observers.events.Event;
 import observers.events.EventType;
 
 public class GameViewWindow {
-    private float leftX, rightX, topY, bottomY;
     private boolean isPlaying;
+    private boolean hover;
 
     public void imgui() {
         ImGui.begin("Game Viewport", ImGuiWindowFlags.NoScrollbar |
@@ -32,30 +32,33 @@ public class GameViewWindow {
         }
         ImGui.endMenuBar();
 
-        ImGui.setCursorPos(ImGui.getCursorPosX(), ImGui.getCursorPosY());
         ImVec2 windowSize = getLargestSizeForViewPort();
-        ImVec2 windowPos = getCenteredPositionForViewport(windowSize);
-        ImGui.setCursorPos(windowPos.x, windowPos.y);
 
-        leftX = windowPos.x + 10;
-        bottomY = windowPos.y; // The coordinate between ImGui and openGL is inverse.
-        rightX = windowPos.x + windowSize.x + 10;
-        topY = windowPos.y + windowSize.y;
+        // The following two lines are problematic
+        //ImVec2 windowPos = getCenteredPositionForViewport(windowSize);
+        //ImGui.setCursorPos(windowPos.x, windowPos.y);
+
+        // TODO: The one problem here is that the position of "game window" is fixed.
+        // But this give the correct result so I will ignore for now because it doesn't affect the functionality.
+        ImVec2 windowPos = ImGui.getCursorScreenPos();
 
 
         int texture2d = Window.get().getFramebuffer().getTextureId();
-        ImGui.image(texture2d, windowSize.x, windowSize.y, 0, 1, 1, 0);
+        ImGui.imageButton(texture2d, windowSize.x, windowSize.y, 0, 1, 1, 0);
+        hover = ImGui.isItemHovered();
 
         // TODO: The result is different from the video "#44 Even More Bug Fixing 17:41"
-        MouseListener.getInstance().setGameViewportPos(new Vector2f(windowPos.x + 10, windowPos.y));
+        // But ImGui.getCursorScreenPos() will give me the correct result so I change it.
+        // The original implementation will change the position when we change the size of GameViewWindow
+        // But seems the way that author use to calculate position of game window is not correct.
+        // He uses the absolute coordinate(getCursorPos) but I think we should use the relative coordinate.
+        MouseListener.getInstance().setGameViewportPos(new Vector2f(windowPos.x, windowPos.y));
         MouseListener.getInstance().setGameViewportSize(new Vector2f(windowSize.x, windowSize.y));
-
 
         ImGui.end();
     }
     public boolean getWantCaptureMouse() {
-        return MouseListener.getInstance().getX() >= leftX && MouseListener.getInstance().getX() <= rightX &&
-               MouseListener.getInstance().getY() >= bottomY && MouseListener.getInstance().getY() <= topY;
+        return hover;
     }
 
     private ImVec2 getLargestSizeForViewPort() {
@@ -80,8 +83,8 @@ public class GameViewWindow {
         float viewportX = (windowSize.x / 2.0f) - (aspectSize.x / 2.0f);
         float viewportY = (windowSize.y / 2.0f) - (aspectSize.y / 2.0f);
 
-        return new ImVec2(viewportX + ImGui.getCursorPosX(),
-                          viewportY + ImGui.getCursorPosY());
-
+        // This shit seems has problem
+        return new ImVec2(viewportX + ImGui.getCursorScreenPosX(),
+                          viewportY + ImGui.getCursorScreenPosY());
     }
 }
