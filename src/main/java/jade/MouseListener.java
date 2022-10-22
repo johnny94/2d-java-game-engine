@@ -116,7 +116,7 @@ public final class MouseListener {
 
         Vector2f windowSpace = new Vector2f(ndcSpacePos.x, ndcSpacePos.y).mul(1.0f / ndcSpacePos.w);
         windowSpace.add(new Vector2f(1.0f, 1.0f)).mul(0.5f);
-        windowSpace.mul(new Vector2f(Window.get().getWidth(), Window.get().getHeight()));
+        windowSpace.mul(new Vector2f(3840, 2160));
 
         return windowSpace;
     }

@@ -2,17 +2,25 @@ package physics2d.components;
 
 import java.util.Optional;
 
+import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.joml.Vector2f;
 
 import components.Component;
+import jade.Window;
 import physics2d.enums.BodyType;
 
 public class RigidBody2D extends Component {
     private Vector2f velocity = new Vector2f();
     private float angularDamping = 0.8f;
+    private float angularVelocity = 0.0f;
     private float linearDamping = 0.9f;
     private float mass = 0;
+    private float friction = 0.1f;
+
+    private float gravityScale = 1.0f;
+    private boolean isSensor;
+
     private BodyType bodyType = BodyType.DYNAMIC;
 
     private boolean fixedRotation = false;
@@ -29,13 +37,79 @@ public class RigidBody2D extends Component {
         }
     }
 
+    public float getAngularVelocity() {
+        return angularVelocity;
+    }
+
+    public void setAngularVelocity(float angularVelocity) {
+        this.angularVelocity = angularVelocity;
+        if (rawBody != null) {
+            rawBody.setAngularVelocity(angularVelocity);
+        }
+    }
+
+    public float getFriction() {
+        return friction;
+    }
+
+    public void setFriction(float friction) {
+        this.friction = friction;
+    }
+
+    public float getGravityScale() {
+        return gravityScale;
+    }
+
+    public void setGravityScale(float gravityScale) {
+        this.gravityScale = gravityScale;
+        if (rawBody != null) {
+            rawBody.setGravityScale(gravityScale);
+        }
+    }
+
+    public boolean isSensor() {
+        return isSensor;
+    }
+
+    public void setIsSensor() {
+        isSensor = true;
+        if (rawBody != null) {
+            // Note. Why don't we just put setSensor method in this class?
+            Window.get().getPhysics().setSensor(this, true);
+        }
+    }
+
+    public void setNotSensor() {
+        isSensor = false;
+        if (rawBody != null) {
+            Window.get().getPhysics().setSensor(this, false);
+        }
+    }
+
+    public void addVelocity(Vector2f forceToAdd) {
+        if (rawBody != null) {
+            rawBody.applyForceToCenter(new Vec2(forceToAdd.x, forceToAdd.y));
+        }
+    }
+
+    public void addImpulse(Vector2f impulse) {
+        if (rawBody != null) {
+            rawBody.applyLinearImpulse(new Vec2(impulse.x, impulse.y), rawBody.getWorldCenter());
+        }
+    }
+
     public Vector2f getVelocity() {
         return velocity;
     }
 
     public void setVelocity(Vector2f velocity) {
-        this.velocity = velocity;
+        this.velocity.set(velocity);
+        if (rawBody != null) {
+            rawBody.setLinearVelocity(new Vec2(velocity.x, velocity.y));
+        }
     }
+
+
 
     public float getAngularDamping() {
         return angularDamping;

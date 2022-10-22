@@ -63,6 +63,7 @@ import org.lwjgl.opengl.GL;
 import observers.EventSystem;
 import observers.Observer;
 import observers.events.Event;
+import physics2d.Physics2D;
 import renderer.DebugDraw;
 import renderer.Framebuffer;
 import renderer.PickingTexture;
@@ -135,6 +136,10 @@ public final class Window implements Observer {
 
     public static Window get() {
         return WindowHolder.window;
+    }
+
+    public Physics2D getPhysics() {
+        return currentScene.getPhysics();
     }
 
     public int getWidth() {
@@ -310,6 +315,8 @@ public final class Window implements Observer {
             imGuiLayer.update(dt, currentScene);
 
             glfwSwapBuffers(glfwWindowPtr);
+
+            KeyListener.getInstance().endFrame();
             MouseListener.getInstance().endFrame();
 
             glfwPollEvents();

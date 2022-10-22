@@ -126,6 +126,10 @@ public class Scene {
         return this.camera;
     }
 
+    public Physics2D getPhysics() {
+        return physics2D;
+    }
+
     public void imGui() {
         sceneInitializer.imGui();
     }

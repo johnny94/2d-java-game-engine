@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.joml.Vector4f;
+
+import components.SpriteRenderer;
 import imgui.ImGui;
 import jade.GameObject;
 import physics2d.components.Box2DCollider;
@@ -13,6 +16,8 @@ import renderer.PickingTexture;
 
 public class PropertiesWindow {
     private List<GameObject> activeGameObjects = new ArrayList<>();
+    private List<Vector4f> activeGameObjectColors = new ArrayList<>();
+
     private GameObject activeGameObject;
     private PickingTexture pickingTexture;
 
@@ -63,18 +68,35 @@ public class PropertiesWindow {
     }
 
     public void clearSelected() {
+        for (int i = 0; i < activeGameObjects.size(); i++) {
+            GameObject go = activeGameObjects.get(i);
+            Optional<SpriteRenderer> maybeSpr = go.getComponent(SpriteRenderer.class);
+            if (maybeSpr.isPresent()) {
+                maybeSpr.get().setColor(activeGameObjectColors.get(i));
+            }
+        }
         this.activeGameObjects.clear();
+        this.activeGameObjectColors.clear();
     }
 
     public void setActiveGameObject(GameObject gameObject) {
         if (gameObject != null) {
             clearSelected();
-            this.activeGameObjects.add(gameObject);
+            addActiveGameObject(gameObject);
         }
     }
 
     public void addActiveGameObject(GameObject gameObject) {
         if (gameObject != null) {
+            Optional<SpriteRenderer> maybeSpr = gameObject.getComponent(SpriteRenderer.class);
+            if (maybeSpr.isPresent()) {
+                SpriteRenderer spr = maybeSpr.get();
+                activeGameObjectColors.add(new Vector4f(spr.getColor()));
+                spr.setColor(new Vector4f(0.8f, 0.8f, 0.0f, 0.8f));
+            } else {
+                activeGameObjectColors.add(new Vector4f());
+            }
+
             this.activeGameObjects.add(gameObject);
         }
     }

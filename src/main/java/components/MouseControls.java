@@ -12,6 +12,7 @@ import org.joml.Vector2i;
 import org.joml.Vector4f;
 
 import components.animation.StateMachine;
+import editor.PropertiesWindow;
 import jade.GameObject;
 import jade.KeyListener;
 import jade.MouseListener;
@@ -63,15 +64,25 @@ public class MouseControls extends Component {
 
         PickingTexture pickingTexture = Window.get().getImGuiLayer().getPropertiesWindow().getPickingTexture();
         Scene currentScene = Window.get().getCurrentScene();
-        if (this.holdingObject != null && debounce <= 0) {
+        if (this.holdingObject != null) {
             holdingObject.transform.position.x = (int)Math.floor(mouseListener.getWorldX() / Settings.GRID_WIDTH) *
                                                  Settings.GRID_WIDTH + Settings.GRID_WIDTH / 2.0f;
             holdingObject.transform.position.y = (int)Math.floor(mouseListener.getWorldY() / Settings.GRID_HEIGHT) *
                                                  Settings.GRID_HEIGHT + Settings.GRID_HEIGHT / 2.0f;
 
             if (mouseListener.isPressed(GLFW_MOUSE_BUTTON_LEFT)) {
-                place();
-                debounce = DEBOUNCE_TIME;
+                float halfWidth = Settings.GRID_WIDTH / 2;
+                float halfHeight = Settings.GRID_HEIGHT / 2;
+
+                // There is a bug that user still can place a block in the same place (by double click)
+                if (mouseListener.isDragging() &&
+                    !blockInSquare(holdingObject.transform.position.x - halfWidth,
+                                   holdingObject.transform.position.y - halfHeight)) {
+                    place();
+                } else if (!mouseListener.isDragging() && debounce <= 0){
+                    place();
+                    debounce = DEBOUNCE_TIME;
+                }
             }
 
             if (KeyListener.getInstance().isKeyPressed(GLFW_KEY_ESCAPE)) {
@@ -144,5 +155,30 @@ public class MouseControls extends Component {
                 }
             }
         }
+    }
+
+    private boolean blockInSquare(float x, float y) { // The x,y is the bottom left of the holding block
+        PropertiesWindow propertiesWindow = Window.get().getImGuiLayer().getPropertiesWindow();
+        Vector2f start = new Vector2f(x, y);
+        Vector2f end = new Vector2f(start).add(new Vector2f(Settings.GRID_WIDTH, Settings.GRID_HEIGHT));
+
+        Vector2f startScreenf = mouseListener.worldToScreen(start);
+        Vector2f endScreenf = mouseListener.worldToScreen(end);
+
+        // Shorter the length of start to end (bottom-left to center(mouse potition))
+        Vector2i startScreen = new Vector2i((int)startScreenf.x + 2, (int)startScreenf.y + 2);
+        Vector2i endScreen = new Vector2i((int)endScreenf.x - 2, (int)endScreenf.y - 2);
+
+        float[] gameObjectIds = propertiesWindow.getPickingTexture().readPixels(startScreen, endScreen);
+        for (float uid : gameObjectIds) {
+            if (uid >= 0) {
+                Optional<GameObject> maybeGo = Window.get().getCurrentScene().getGameObject((int)uid);
+                if (maybeGo.isPresent() && !maybeGo.get().getComponent(NonPickable.class).isPresent()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

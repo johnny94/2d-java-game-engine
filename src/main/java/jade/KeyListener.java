@@ -5,6 +5,8 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_UNKNOWN;
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 
+import java.util.Arrays;
+
 public final class KeyListener {
     private static final class InstanceHolder {
         static final KeyListener instance = new KeyListener();
@@ -17,6 +19,10 @@ public final class KeyListener {
 
     public static KeyListener getInstance() {
         return InstanceHolder.instance;
+    }
+
+    public void endFrame() {
+        Arrays.fill(keyBeginPressed, false);
     }
 
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
@@ -39,11 +45,6 @@ public final class KeyListener {
     }
 
     public boolean keyBeginPress(int key) {
-        boolean result = keyBeginPressed[key];
-        if (result) {
-            keyBeginPressed[key] = false;
-        }
-
-        return result;
+        return  keyBeginPressed[key];
     }
 }
