@@ -15,5 +15,6 @@ public final class GsonUtils {
             .setPrettyPrinting()
             .registerTypeAdapter(Component.class, new ComponentDeserializer())
             .registerTypeAdapter(GameObject.class, new GameObjectDeserializer())
+            .enableComplexMapKeySerialization()
             .create();
 }

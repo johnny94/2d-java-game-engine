@@ -17,16 +17,22 @@ import components.Transform;
 import jade.GameObject;
 import physics2d.components.Box2DCollider;
 import physics2d.components.CircleCollider;
+import physics2d.components.PillBoxCollider;
 import physics2d.components.RigidBody2D;
 
 public class Physics2D {
     private Vec2 gravity = new Vec2(0, -10.0f);
-    private World world = new World(gravity);
+    private World world;
 
     private float physicsTime = 0.0f;
     private float physicsTimeStep = 1.0f / 60.0f;
     private int velocityIteration = 8;
     private int positionIteration = 3;
+
+    public Physics2D() {
+        world = new World(gravity);
+        world.setContactListener(new JadeContactListener());
+    }
 
     public void add(GameObject gameObject) {
         Optional<RigidBody2D> maybeRigidBody2D = gameObject.getComponent(RigidBody2D.class);
@@ -57,13 +63,14 @@ public class Physics2D {
             body.m_mass = rigidBody2D.getMass();
             rigidBody2D.setRawBody(body);
 
-            gameObject.getComponent(CircleCollider.class).ifPresent(circleCollider -> {
-                addCircleCollider(rigidBody2D, circleCollider);
-            });
+            gameObject.getComponent(CircleCollider.class)
+                      .ifPresent(circleCollider -> addCircleCollider(rigidBody2D, circleCollider));
 
-            gameObject.getComponent(Box2DCollider.class).ifPresent(box2DCollider -> {
-               addBox2DCollider(rigidBody2D, box2DCollider);
-            });
+            gameObject.getComponent(Box2DCollider.class)
+                      .ifPresent(box2DCollider -> addBox2DCollider(rigidBody2D, box2DCollider));
+
+            gameObject.getComponent(PillBoxCollider.class)
+                      .ifPresent(pillBoxCollider -> addPillBoxCollider(rigidBody2D, pillBoxCollider));
 
         }
     }
@@ -129,7 +136,6 @@ public class Physics2D {
 
         Body body = mayBody.get();
 
-
         CircleShape circleShape = new CircleShape();
         circleShape.setRadius(circleCollider.getRadius());
         circleShape.m_p.set(new Vec2(circleCollider.getOffset().x, circleCollider.getOffset().y));
@@ -157,6 +163,26 @@ public class Physics2D {
         body.resetMassData();
     }
 
+    public void addPillBoxCollider(RigidBody2D rb, PillBoxCollider pillBoxCollider) {
+        assert rb.getRawBody().isPresent() : "Raw Body must not be null";
+        addCircleCollider(rb, pillBoxCollider.getTopCircle());
+        addBox2DCollider(rb, pillBoxCollider.getBox());
+        addCircleCollider(rb, pillBoxCollider.getBottomCircle());
+    }
+
+    public void resetPillBoxCollider(RigidBody2D rigidBody2D, PillBoxCollider pillBoxCollider) {
+        Optional<Body> maybeBody = rigidBody2D.getRawBody();
+        if (!maybeBody.isPresent()) {
+            return;
+        }
+
+        Body body = maybeBody.get();
+        destroyAllFixture(body);
+
+        addPillBoxCollider(rigidBody2D, pillBoxCollider);
+        body.resetMassData();
+    }
+
     public RayCastInfo rayCast(GameObject requestingObject, Vector2f point1, Vector2f point2) {
         RayCastInfo callback = new RayCastInfo(requestingObject);
         world.raycast(callback, new Vec2(point1.x, point1.y), new Vec2(point2.x, point2.y));
@@ -175,6 +201,14 @@ public class Physics2D {
             fixture.setSensor(isSensor);
             fixture = fixture.getNext();
         }
+    }
+
+    public boolean isLocked() {
+        return world.isLocked();
+    }
+
+    public Vector2f getGravity() {
+        return new Vector2f(world.getGravity().x, world.getGravity().y);
     }
 
     private void destroyAllFixture(Body body) {

@@ -29,7 +29,7 @@ import util.AssetPool;
 import util.JMath;
 
 public final class DebugDraw {
-    private static final int MAX_LINE = 500;
+    private static final int MAX_LINE = 5000;
     private static final int POS_SIZE = 3; // x y z
     private static final int COLOR_SIZE = 3; // r g b
     private static final int VERTEX_SIZE = POS_SIZE + COLOR_SIZE;

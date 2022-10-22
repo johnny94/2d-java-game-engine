@@ -74,6 +74,7 @@ public class StateMachine extends Component {
             AnimationState state = states.get(to);
             if (state != null) {
                 this.currentState = state;
+                return;
             }
         }
 

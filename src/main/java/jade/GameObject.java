@@ -4,15 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.google.gson.Gson;
-
 import components.Component;
-import components.ComponentDeserializer;
 import components.SpriteRenderer;
 import components.Transform;
 import imgui.ImGui;
 import renderer.Texture;
 import util.AssetPool;
+import util.GsonUtils;
 
 public class GameObject {
     private static int ID_COUNTER;
@@ -112,13 +110,8 @@ public class GameObject {
 
     public GameObject copy() {
         // TODO: Come up with a cleaner solution
-        Gson gson = new Gson()
-                .newBuilder()
-                .registerTypeAdapter(Component.class, new ComponentDeserializer())
-                .registerTypeAdapter(GameObject.class, new GameObjectDeserializer())
-                .create();
-        String json = gson.toJson(this);
-        GameObject gameObject = gson.fromJson(json, GameObject.class);
+        String json = GsonUtils.DEFAULT_GSON.toJson(this);
+        GameObject gameObject = GsonUtils.DEFAULT_GSON.fromJson(json, GameObject.class);
         gameObject.generateUid();
         for(Component c : gameObject.getComponents()) {
             c.generateId();
