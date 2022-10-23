@@ -31,9 +31,20 @@ public class RigidBody2D extends Component {
     @Override
     public void update(float deltaTime) {
         if (rawBody != null) {
-            this.gameObject.transform.position.set(rawBody.getPosition().x,
-                                                   rawBody.getPosition().y);
-            this.gameObject.transform.rotation = (float)Math.toDegrees(rawBody.getAngle());
+            if (bodyType == BodyType.DYNAMIC || bodyType == BodyType.KINEMATIC) {
+                gameObject.transform.position.set(rawBody.getPosition().x,
+                                                  rawBody.getPosition().y);
+                gameObject.transform.rotation = (float)Math.toDegrees(rawBody.getAngle());
+
+                // Note. I think this is meaningless
+                //Vec2 velocity = rawBody.getLinearVelocity();
+                //setVelocity(velocity);
+            } else if (bodyType == BodyType.STATIC) {
+                // We don't want to let physics engine to control transform if it is STATIC
+                // e.g., BreakableBrick
+                rawBody.setTransform(new Vec2(gameObject.transform.position.x, gameObject.transform.position.y),
+                                     gameObject.transform.rotation);
+            }
         }
     }
 

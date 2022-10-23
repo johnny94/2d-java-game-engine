@@ -26,6 +26,7 @@ import org.joml.Vector3f;
 
 import jade.Window;
 import util.AssetPool;
+import util.Color;
 import util.JMath;
 
 public final class DebugDraw {
@@ -147,7 +148,7 @@ public final class DebugDraw {
     // 2D Line
     // =========================
     public static void drawLine(Vector2f from, Vector2f to) {
-        drawLine(from, to, new Vector3f(0, 1, 0));
+        drawLine(from, to, Color.GREEN);
     }
 
     public static void drawLine(Vector2f from, Vector2f to, Vector3f color) {
@@ -167,7 +168,7 @@ public final class DebugDraw {
     // 2D Box
     // =========================
     public static void drawBox(Vector2f center, Vector2f dimensions, float rotation) {
-        drawBox(center, dimensions, rotation, new Vector3f(0.0f, 1.0f, 0.0f));
+        drawBox(center, dimensions, rotation, Color.GREEN);
     }
 
     public static void drawBox(Vector2f center, Vector2f dimensions, float rotation, Vector3f color) {

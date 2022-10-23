@@ -7,13 +7,14 @@ import org.joml.Vector2f;
 import components.EditorCamera;
 import components.GizmoManager;
 import components.GridLines;
-import components.Ground;
 import components.KeyControls;
 import components.MouseControls;
 import components.Sprite;
 import components.SpriteRenderer;
 import components.SpriteSheet;
 import components.animation.StateMachine;
+import components.game.BreakableBrick;
+import components.game.Ground;
 import imgui.ImGui;
 import imgui.ImVec2;
 import jade.GameObject;
@@ -156,8 +157,7 @@ public class LevelEditorSceneInitializer extends SceneInitializer {
                     go.addComponent(new Ground());
 
                     if (i == 12) {
-                        // Add breakable component
-                        //go.addComponent();
+                        go.addComponent(new BreakableBrick());
                     }
 
                     levelEditorObject.getComponent(MouseControls.class)
