@@ -42,7 +42,23 @@ public class QuestionBlock extends Block {
     }
 
     private void doPowerUp(PlayerController playerController) {
+        if (playerController.isSmall()) {
+            spawnMushroom();
+        } else {
+            spawnFlower();
+        }
+    }
 
+    private void spawnMushroom() {
+        GameObject mushroom = Prefabs.generateMushroom();
+        mushroom.transform.position.set(gameObject.transform.position).add(0, 0.25f);
+        Window.get().getCurrentScene().addGameObject(mushroom);
+    }
+
+    private void spawnFlower() {
+        GameObject flower = Prefabs.generateFlower();
+        flower.transform.position.set(gameObject.transform.position).add(0, 0.25f);
+        Window.get().getCurrentScene().addGameObject(flower);
     }
 
     private void doInvincibility(PlayerController playerController) {

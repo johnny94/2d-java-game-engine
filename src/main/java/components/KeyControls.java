@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import components.animation.StateMachine;
 import editor.PropertiesWindow;
 import jade.GameObject;
 import jade.KeyListener;
@@ -32,6 +33,9 @@ public class KeyControls extends Component {
             Window.get().getCurrentScene().addGameObject(newObject);
             newObject.transform.position.add(Settings.GRID_WIDTH, 0.0f);
             propertiesWindow.setActiveGameObject(newObject);
+
+            newObject.getComponent(StateMachine.class).ifPresent(StateMachine::refreshTexture);
+
         } else if (keyListener.isKeyPressed(GLFW_KEY_LEFT_CONTROL) && keyListener.keyBeginPress(GLFW_KEY_D) &&
                    activeGameObjects.size() > 1) {
 
@@ -39,9 +43,10 @@ public class KeyControls extends Component {
             List<GameObject> gameObjects = new ArrayList<>(activeGameObjects);
             propertiesWindow.clearSelected();
             for (GameObject go : gameObjects) {
-                GameObject tmp = go.copy();
-                Window.get().getCurrentScene().addGameObject(tmp);
-                propertiesWindow.addActiveGameObject(tmp);
+                GameObject copy = go.copy();
+                Window.get().getCurrentScene().addGameObject(copy);
+                propertiesWindow.addActiveGameObject(copy);
+                copy.getComponent(StateMachine.class).ifPresent(StateMachine::refreshTexture);
             }
 
         } else if (keyListener.isKeyPressed(GLFW_KEY_K)) {

@@ -13,6 +13,7 @@ import jade.GameObject;
 import jade.KeyListener;
 import jade.Window;
 import physics2d.RayCastInfo;
+import physics2d.components.PillBoxCollider;
 import physics2d.components.RigidBody2D;
 import renderer.DebugDraw;
 import util.AssetPool;
@@ -172,6 +173,28 @@ public class PlayerController extends Component {
 
     public boolean isSmall() {
         return playerState == PlayerState.Small;
+    }
+
+    public void powerUp() {
+        if (playerState == PlayerState.Small) {
+            playerState = PlayerState.Big;
+            AssetPool.getSound("assets/sounds/powerup.ogg").play();
+            gameObject.transform.scale.y = 0.42f;
+
+            gameObject.getComponent(PillBoxCollider.class).ifPresent(pillBoxCollider -> {
+                // Because we use Box2D to control our player
+                // When we make the Box bigger we should increase "force" to make the character
+                // act as the same the original one.
+                jumpBoost *= bigJumpBoostFactor;
+                walkSpeed *= bigJumpBoostFactor;
+                pillBoxCollider.setHeight(0.63f);
+            });
+        } else if (playerState == PlayerState.Big) {
+            playerState = PlayerState.Fire;
+            AssetPool.getSound("assets/sounds/powerup.ogg").play();
+        }
+
+        stateMachine.trigger("powerup");
     }
 
     private void checkOnGround() {

@@ -232,9 +232,15 @@ public class RenderBatch implements Comparable<RenderBatch> {
         for (int i = 0; i < numSprites; i++) {
             SpriteRenderer spr = spriteRenderers[i];
             if (spr.isDirty()) {
-                loadVertexProperties(i);
-                spr.setClean();
-                rebufferData = true;
+                if (!hasTexture(spr.getTexture().get())) {
+                    renderer.destroyGameObject(spr.gameObject);
+                    renderer.add(spr.gameObject);
+                } else {
+                    loadVertexProperties(i);
+                    spr.setClean();
+                    rebufferData = true;
+                }
+
             }
 
             // TODO: Get better solution for this

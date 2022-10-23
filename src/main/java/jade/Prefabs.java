@@ -9,9 +9,12 @@ import components.SpriteSheet;
 import components.animation.AnimationState;
 import components.animation.StateMachine;
 import components.game.BlockCoin;
+import components.game.Flower;
 import components.game.Ground;
+import components.game.MushroomAI;
 import components.game.QuestionBlock;
 import physics2d.components.Box2DCollider;
+import physics2d.components.CircleCollider;
 import physics2d.components.PillBoxCollider;
 import physics2d.components.RigidBody2D;
 import physics2d.enums.BodyType;
@@ -254,5 +257,43 @@ public class Prefabs {
         coin.addComponent(new BlockCoin());
 
         return coin;
+    }
+
+    public static GameObject generateMushroom() {
+        SpriteSheet items = AssetPool.getSpriteSheet("assets/images/spritesheets/items.png");
+        GameObject mushroom = generateSpriteObject(items.getSprite(10), 0.25f, 0.25f);
+
+        RigidBody2D rigidBody2D = new RigidBody2D();
+        rigidBody2D.setBodyType(BodyType.DYNAMIC);
+        rigidBody2D.setFixedRotation(true);
+        rigidBody2D.setContinuousCollision(false);
+        mushroom.addComponent(rigidBody2D);
+
+        CircleCollider circleCollider = new CircleCollider();
+        circleCollider.setRadius(0.14f);
+        mushroom.addComponent(circleCollider);
+
+        mushroom.addComponent(new MushroomAI());
+
+        return mushroom;
+    }
+
+    public static GameObject generateFlower() {
+        SpriteSheet items = AssetPool.getSpriteSheet("assets/images/spritesheets/items.png");
+        GameObject flower = generateSpriteObject(items.getSprite(20), 0.25f, 0.25f);
+
+        RigidBody2D rigidBody2D = new RigidBody2D();
+        rigidBody2D.setBodyType(BodyType.STATIC);
+        rigidBody2D.setFixedRotation(true);
+        rigidBody2D.setContinuousCollision(false);
+        flower.addComponent(rigidBody2D);
+
+        CircleCollider circleCollider = new CircleCollider();
+        circleCollider.setRadius(0.14f);
+        flower.addComponent(circleCollider);
+
+        flower.addComponent(new Flower());
+
+        return flower;
     }
 }

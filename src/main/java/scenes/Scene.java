@@ -26,6 +26,12 @@ public class Scene {
     private final Renderer renderer;
     private Camera camera;
     private final List<GameObject> gameObjects;
+
+    // GameObjects going to be add at runtime
+    // Box2d will crash if we add Body to the World during the frame
+    // So for some dynamically generated objects we should add it at the end of the update loop.
+    private final List<GameObject> pendingObjects;
+
     private final Physics2D physics2D;
 
     private final SceneInitializer sceneInitializer;
@@ -35,6 +41,7 @@ public class Scene {
         this.renderer = new Renderer();
         this.physics2D = new Physics2D();
         this.gameObjects = new ArrayList<>();
+        this.pendingObjects = new ArrayList<>();
     }
 
     public void init() {
@@ -67,6 +74,15 @@ public class Scene {
                 i--;
             }
         }
+
+        // Note: I think putting these lines in update() is enough
+        for(GameObject go : pendingObjects) {
+            gameObjects.add(go);
+            go.start();
+            this.renderer.add(go);
+            this.physics2D.add(go);
+        }
+        pendingObjects.clear();
     }
 
     public void update(float deltaTime) {
@@ -84,6 +100,14 @@ public class Scene {
                 i--;
             }
         }
+
+        for(GameObject go : pendingObjects) {
+            gameObjects.add(go);
+            go.start();
+            this.renderer.add(go);
+            this.physics2D.add(go);
+        }
+        pendingObjects.clear();
     }
 
     public void render() {
@@ -105,10 +129,7 @@ public class Scene {
         if (!isRunning) {
             gameObjects.add(gameObject);
         } else {
-            gameObjects.add(gameObject);
-            gameObject.start();
-            this.renderer.add(gameObject);
-            this.physics2D.add(gameObject);
+            pendingObjects.add(gameObject);
         }
     }
 

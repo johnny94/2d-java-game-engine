@@ -36,9 +36,8 @@ public class RigidBody2D extends Component {
                                                   rawBody.getPosition().y);
                 gameObject.transform.rotation = (float)Math.toDegrees(rawBody.getAngle());
 
-                // Note. I think this is meaningless
-                //Vec2 velocity = rawBody.getLinearVelocity();
-                //setVelocity(velocity);
+                Vec2 velocity = rawBody.getLinearVelocity();
+                setVelocity(new Vector2f(velocity.x, velocity.y));
             } else if (bodyType == BodyType.STATIC) {
                 // We don't want to let physics engine to control transform if it is STATIC
                 // e.g., BreakableBrick
@@ -110,6 +109,7 @@ public class RigidBody2D extends Component {
     }
 
     public Vector2f getVelocity() {
+
         return velocity;
     }
 
