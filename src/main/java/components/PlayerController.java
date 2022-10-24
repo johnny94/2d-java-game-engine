@@ -6,18 +6,20 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
 
 import org.jbox2d.dynamics.contacts.Contact;
 import org.joml.Vector2f;
+import org.joml.Vector4f;
 
 import components.animation.StateMachine;
 import components.game.Ground;
 import jade.GameObject;
 import jade.KeyListener;
 import jade.Window;
-import physics2d.RayCastInfo;
+import physics2d.Physics2D;
 import physics2d.components.PillBoxCollider;
 import physics2d.components.RigidBody2D;
-import renderer.DebugDraw;
+import physics2d.enums.BodyType;
+import scenes.LevelEditorSceneInitializer;
 import util.AssetPool;
-import util.Color;
+import util.JMath;
 
 public class PlayerController extends Component {
     private enum PlayerState {
@@ -45,9 +47,17 @@ public class PlayerController extends Component {
 
     private transient RigidBody2D rigidBody2D;
     private transient StateMachine stateMachine;
+    private transient SpriteRenderer spriteRenderer;
     private transient float bigJumpBoostFactor = 1.05f;
     private transient float playerWidth = 0.25f;
     private transient int jumpTime;
+
+    private transient float hurtInvincibilityTimeLeft;
+    private transient float hurtInvincibilityTime = 1.4f;
+    private transient float deadMaxHeight;
+    private transient float deadMinHeight;
+    private transient boolean deadGoingUp = true;
+    private transient float blinkTime;
 
     private transient Vector2f acceleration = new Vector2f();
     private transient Vector2f velocity = new Vector2f();
@@ -58,9 +68,11 @@ public class PlayerController extends Component {
     public void start() {
         assert gameObject.getComponent(RigidBody2D.class).isPresent() : "RigidBody2D should not be null";
         assert gameObject.getComponent(StateMachine.class).isPresent() : "StateMachine should not be null";
+        assert gameObject.getComponent(SpriteRenderer.class).isPresent() : "SpriteRenderer should not be null";
 
         this.rigidBody2D = gameObject.getComponent(RigidBody2D.class).get();
         this.stateMachine = gameObject.getComponent(StateMachine.class).get();
+        this.spriteRenderer = gameObject.getComponent(SpriteRenderer.class).get();
 
         // We don't want box2d to control physics here so set to 0
         this.rigidBody2D.setGravityScale(0.0f);
@@ -68,6 +80,42 @@ public class PlayerController extends Component {
 
     @Override
     public void update(float deltaTime) {
+        if (isDead) {
+            if (gameObject.transform.position.y < deadMaxHeight && deadGoingUp) {
+                gameObject.transform.position.y += deltaTime * walkSpeed / 2.0f;
+            } else if (gameObject.transform.position.y >= deadMaxHeight && deadGoingUp) {
+                deadGoingUp = false;
+            } else if (!deadGoingUp && gameObject.transform.position.y > deadMinHeight) {
+                rigidBody2D.setBodyType(BodyType.KINEMATIC);
+                acceleration.y = Window.get().getPhysics().getGravity().y * 0.7f;
+                velocity.y += acceleration.y * deltaTime;
+                velocity.y = JMath.clamp(velocity.y, -terminalVelocity.y, terminalVelocity.y);
+                rigidBody2D.setVelocity(velocity);
+                rigidBody2D.setAngularVelocity(0);
+            } else if (!deadGoingUp && gameObject.transform.position.y <= deadMinHeight) {
+                Window.get().changeScene(new LevelEditorSceneInitializer());
+            }
+            return;
+        }
+
+        if (hurtInvincibilityTimeLeft > 0) {
+            hurtInvincibilityTimeLeft -= deltaTime;
+            blinkTime -= deltaTime;
+
+            if (blinkTime <= 0) {
+                blinkTime = 0.2f;
+                if (spriteRenderer.getColor().w == 1) {
+                    spriteRenderer.setColor(new Vector4f(1, 1, 1, 0));
+                } else {
+                    spriteRenderer.setColor(new Vector4f(1, 1, 1, 1));
+                }
+            } else {
+                if (spriteRenderer.getColor().w == 0) {
+                    spriteRenderer.setColor(new Vector4f(1, 1, 1, 1));
+                }
+            }
+        }
+
         if (keyListener.isKeyPressed(GLFW_KEY_RIGHT)) {
             this.gameObject.transform.scale.x = playerWidth;
             this.acceleration.x = walkSpeed;
@@ -122,6 +170,9 @@ public class PlayerController extends Component {
             }
 
             groundDebounce = 0;
+        } else if (enemyBounce > 0) {
+            enemyBounce--;
+            velocity.y = (enemyBounce / 2.2f) * jumpBoost;
         } else if (!onGround){ // Handle the case of jumping or just leaving the ground
             if (jumpTime > 0) {
                 velocity.y *= 0.35;
@@ -175,6 +226,55 @@ public class PlayerController extends Component {
         return playerState == PlayerState.Small;
     }
 
+    public boolean isDead() {
+        return isDead;
+    }
+
+    public boolean isHurtInvincible() {
+        return hurtInvincibilityTimeLeft > 0;
+    }
+
+    public boolean isInvincible() {
+        return playerState == PlayerState.Invincible || isHurtInvincible();
+    }
+
+    public void die() {
+        stateMachine.trigger("die");
+        if (playerState == PlayerState.Small) {
+            velocity.zero();
+            acceleration.zero();
+            rigidBody2D.setVelocity(velocity);
+            isDead = true;
+            rigidBody2D.setIsSensor();
+            AssetPool.getSound("assets/sounds/mario_die.ogg").play();
+            deadMaxHeight = gameObject.transform.position.y + 0.3f;
+            rigidBody2D.setBodyType(BodyType.STATIC);
+            if (gameObject.transform.position.y > 0) {
+                deadMinHeight = -0.25f;
+            }
+        } else if (playerState == PlayerState.Big) {
+            playerState = PlayerState.Small;
+            gameObject.transform.scale.y = 0.25f;
+            gameObject.getComponent(PillBoxCollider.class).ifPresent(pillBoxCollider -> {
+                jumpBoost /= bigJumpBoostFactor;
+                walkSpeed /= bigJumpBoostFactor;
+                pillBoxCollider.setHeight(0.31f);
+            });
+
+            hurtInvincibilityTimeLeft = hurtInvincibilityTime;
+            AssetPool.getSound("assets/sounds/pipe.ogg").play();
+
+        } else if (playerState == PlayerState.Fire) {
+            playerState = PlayerState.Big;
+            hurtInvincibilityTimeLeft = hurtInvincibilityTime;
+            AssetPool.getSound("assets/sounds/pipe.ogg").play();
+        }
+    }
+
+    public void enemyBounce() {
+        enemyBounce = 8;
+    }
+
     public void powerUp() {
         if (playerState == PlayerState.Small) {
             playerState = PlayerState.Big;
@@ -201,24 +301,6 @@ public class PlayerController extends Component {
         float innerPlayerWidth = playerWidth * 0.6f;
         float yVal = playerState == PlayerState.Small ? -0.14f : -0.24f;
 
-        Vector2f rayCastBegin = new Vector2f(gameObject.transform.position);
-        rayCastBegin.sub(innerPlayerWidth / 2, 0);
-        Vector2f rayCastEnd = new Vector2f(rayCastBegin).add(0, yVal);
-        RayCastInfo leftSide = Window.get().getPhysics().rayCast(gameObject, rayCastBegin, rayCastEnd);
-
-        Vector2f rayCastBegin2 = new Vector2f(rayCastBegin).add(innerPlayerWidth, 0);
-        Vector2f rayCastEnd2 = new Vector2f(rayCastEnd).add(innerPlayerWidth, 0);
-        RayCastInfo rightSide = Window.get().getPhysics().rayCast(gameObject, rayCastBegin2, rayCastEnd2);
-
-        onGround = checkOnGround(leftSide, rightSide);
-
-        DebugDraw.drawLine(rayCastBegin, rayCastEnd, Color.RED);
-        DebugDraw.drawLine(rayCastBegin2, rayCastEnd2, Color.RED);
+        onGround = Physics2D.checkOnGround(gameObject, innerPlayerWidth, yVal);
     }
-
-    private boolean checkOnGround(RayCastInfo left, RayCastInfo right) {
-        return (left.hit && left.hitObject != null && left.hitObject.getComponent(Ground.class).isPresent()) ||
-               (right.hit && right.hitObject != null && right.hitObject.getComponent(Ground.class).isPresent());
-    }
-
 }

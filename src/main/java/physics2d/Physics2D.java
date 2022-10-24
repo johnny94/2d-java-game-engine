@@ -14,11 +14,15 @@ import org.jbox2d.dynamics.World;
 import org.joml.Vector2f;
 
 import components.Transform;
+import components.game.Ground;
 import jade.GameObject;
+import jade.Window;
 import physics2d.components.Box2DCollider;
 import physics2d.components.CircleCollider;
 import physics2d.components.PillBoxCollider;
 import physics2d.components.RigidBody2D;
+import renderer.DebugDraw;
+import util.Color;
 
 public class Physics2D {
     private Vec2 gravity = new Vec2(0, -10.0f);
@@ -209,6 +213,23 @@ public class Physics2D {
 
     public Vector2f getGravity() {
         return new Vector2f(world.getGravity().x, world.getGravity().y);
+    }
+
+    public static boolean checkOnGround(GameObject gameObject, float innerPlayerWidth, float height) {
+        Vector2f rayCastBegin = new Vector2f(gameObject.transform.position);
+        rayCastBegin.sub(innerPlayerWidth / 2, 0);
+        Vector2f rayCastEnd = new Vector2f(rayCastBegin).add(0, height);
+        RayCastInfo left = Window.get().getPhysics().rayCast(gameObject, rayCastBegin, rayCastEnd);
+
+        Vector2f rayCastBegin2 = new Vector2f(rayCastBegin).add(innerPlayerWidth, 0);
+        Vector2f rayCastEnd2 = new Vector2f(rayCastEnd).add(innerPlayerWidth, 0);
+        RayCastInfo right = Window.get().getPhysics().rayCast(gameObject, rayCastBegin2, rayCastEnd2);
+
+        DebugDraw.drawLine(rayCastBegin, rayCastEnd, Color.RED);
+        DebugDraw.drawLine(rayCastBegin2, rayCastEnd2, Color.RED);
+
+        return (left.hit && left.hitObject != null && left.hitObject.getComponent(Ground.class).isPresent()) ||
+               (right.hit && right.hitObject != null && right.hitObject.getComponent(Ground.class).isPresent());
     }
 
     private void destroyAllFixture(Body body) {

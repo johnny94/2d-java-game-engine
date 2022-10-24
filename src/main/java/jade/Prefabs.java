@@ -10,6 +10,7 @@ import components.animation.AnimationState;
 import components.animation.StateMachine;
 import components.game.BlockCoin;
 import components.game.Flower;
+import components.game.GoombaAI;
 import components.game.Ground;
 import components.game.MushroomAI;
 import components.game.QuestionBlock;
@@ -257,6 +258,42 @@ public class Prefabs {
         coin.addComponent(new BlockCoin());
 
         return coin;
+    }
+
+    public static GameObject generateGoomba() {
+        SpriteSheet sprite = AssetPool.getSpriteSheet("assets/images/spritesheets/spritesheet.png");
+        GameObject goomba = generateSpriteObject(sprite.getSprite(14), 0.25f, 0.25f);
+
+        AnimationState walk = new AnimationState("Walk");
+        float defaultFrameTime = 0.23f;
+        walk.addFrame(sprite.getSprite(14), defaultFrameTime);
+        walk.addFrame(sprite.getSprite(15), defaultFrameTime);
+        walk.setLoop(true);
+
+        AnimationState squashed = new AnimationState("Squashed");
+        squashed.addFrame(sprite.getSprite(16), 0.1f);
+        squashed.setLoop(false);
+
+        StateMachine stateMachine = new StateMachine();
+        stateMachine.addState(walk);
+        stateMachine.addState(squashed);
+        stateMachine.addTrigger(walk.title, squashed.title, "squashMe");
+        stateMachine.setDefaultState(walk.title);
+        goomba.addComponent(stateMachine);
+
+        RigidBody2D rigidBody2D = new RigidBody2D();
+        rigidBody2D.setBodyType(BodyType.DYNAMIC);
+        rigidBody2D.setFixedRotation(true);
+        rigidBody2D.setMass(0.1f);
+        goomba.addComponent(rigidBody2D);
+
+        CircleCollider circleCollider = new CircleCollider();
+        circleCollider.setRadius(0.12f);
+        goomba.addComponent(circleCollider);
+
+        goomba.addComponent(new GoombaAI());
+
+        return goomba;
     }
 
     public static GameObject generateMushroom() {
