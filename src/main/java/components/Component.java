@@ -83,6 +83,9 @@ public abstract class Component {
                     if (ImGui.combo(field.getName(), index, enumValues, enumValues.length)) {
                         field.set(this, type.getEnumConstants()[index.get()]);
                     }
+                } else if (type.equals(String.class)) {
+                    field.set(this,
+                              JImGui.inputText(field.getName() + ": ", (String)value));
                 }
 
                 if (isPrivate) {

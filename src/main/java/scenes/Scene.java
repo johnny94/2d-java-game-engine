@@ -143,6 +143,12 @@ public class Scene {
                           .findFirst();
     }
 
+    public Optional<GameObject> getGameObject(String name) {
+        return gameObjects.stream()
+                          .filter(gameObject -> gameObject.name.equals(name))
+                          .findFirst();
+    }
+
     public Camera getCamera() {
         return this.camera;
     }

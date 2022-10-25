@@ -9,10 +9,12 @@ import components.SpriteSheet;
 import components.animation.AnimationState;
 import components.animation.StateMachine;
 import components.game.BlockCoin;
+import components.game.Direction;
 import components.game.Flower;
 import components.game.GoombaAI;
 import components.game.Ground;
 import components.game.MushroomAI;
+import components.game.Pipe;
 import components.game.QuestionBlock;
 import physics2d.components.Box2DCollider;
 import physics2d.components.CircleCollider;
@@ -332,5 +334,29 @@ public class Prefabs {
         flower.addComponent(new Flower());
 
         return flower;
+    }
+
+    public static GameObject generatePipe(Direction direction) {
+        SpriteSheet pipes = AssetPool.getSpriteSheet("assets/images/spritesheets/pipes.png");
+        int index = direction == Direction.Down ? 0 :
+                    direction == Direction.Up ? 1 :
+                    direction == Direction.Right ? 2:
+                    direction == Direction.Left ? 3: -1; // -1 never happen
+
+        GameObject pipe = generateSpriteObject(pipes.getSprite(index), 0.5f, 0.5f);
+
+        RigidBody2D rigidBody2D = new RigidBody2D();
+        rigidBody2D.setBodyType(BodyType.STATIC);
+        rigidBody2D.setFixedRotation(true);
+        rigidBody2D.setContinuousCollision(false);
+        pipe.addComponent(rigidBody2D);
+
+       Box2DCollider box2DCollider = new Box2DCollider();
+       box2DCollider.setHalfSize(new Vector2f(0.5f, 0.5f));
+       pipe.addComponent(box2DCollider);
+       pipe.addComponent(new Ground());
+       pipe.addComponent(new Pipe(direction));
+
+        return pipe;
     }
 }

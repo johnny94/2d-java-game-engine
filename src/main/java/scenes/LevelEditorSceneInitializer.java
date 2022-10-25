@@ -14,6 +14,7 @@ import components.SpriteRenderer;
 import components.SpriteSheet;
 import components.animation.StateMachine;
 import components.game.BreakableBrick;
+import components.game.Direction;
 import components.game.Ground;
 import imgui.ImGui;
 import imgui.ImVec2;
@@ -269,7 +270,63 @@ public class LevelEditorSceneInitializer extends SceneInitializer {
             ImGui.popID();
             ImGui.sameLine();
 
+            // Pipe
+            SpriteSheet pipe = AssetPool.getSpriteSheet("assets/images/spritesheets/pipes.png");
+            sprite = pipe.getSprite(0);
+            texId = sprite.getTextureId();
+            texCoords = sprite.getTexCoords();
+            ImGui.pushID(uid++);
+            if (ImGui.imageButton(texId, widgetWidth, widgetHeight,
+                                  texCoords[2].x, texCoords[0].y,
+                                  texCoords[0].x, texCoords[2].y)) {
+                GameObject go = Prefabs.generatePipe(Direction.Down);
+                levelEditorObject.getComponent(MouseControls.class)
+                                 .ifPresent(m -> m.pickUpObject(go));
+            }
+            ImGui.popID();
+            ImGui.sameLine();
 
+            sprite = pipe.getSprite(1);
+            texId = sprite.getTextureId();
+            texCoords = sprite.getTexCoords();
+            ImGui.pushID(uid++);
+            if (ImGui.imageButton(texId, widgetWidth, widgetHeight,
+                                  texCoords[2].x, texCoords[0].y,
+                                  texCoords[0].x, texCoords[2].y)) {
+                GameObject go = Prefabs.generatePipe(Direction.Up);
+                levelEditorObject.getComponent(MouseControls.class)
+                                 .ifPresent(m -> m.pickUpObject(go));
+            }
+            ImGui.popID();
+            ImGui.sameLine();
+
+            sprite = pipe.getSprite(2);
+            texId = sprite.getTextureId();
+            texCoords = sprite.getTexCoords();
+            ImGui.pushID(uid++);
+            if (ImGui.imageButton(texId, widgetWidth, widgetHeight,
+                                  texCoords[2].x, texCoords[0].y,
+                                  texCoords[0].x, texCoords[2].y)) {
+                GameObject go = Prefabs.generatePipe(Direction.Right);
+                levelEditorObject.getComponent(MouseControls.class)
+                                 .ifPresent(m -> m.pickUpObject(go));
+            }
+            ImGui.popID();
+            ImGui.sameLine();
+
+            sprite = pipe.getSprite(3);
+            texId = sprite.getTextureId();
+            texCoords = sprite.getTexCoords();
+            ImGui.pushID(uid++);
+            if (ImGui.imageButton(texId, widgetWidth, widgetHeight,
+                                  texCoords[2].x, texCoords[0].y,
+                                  texCoords[0].x, texCoords[2].y)) {
+                GameObject go = Prefabs.generatePipe(Direction.Left);
+                levelEditorObject.getComponent(MouseControls.class)
+                                 .ifPresent(m -> m.pickUpObject(go));
+            }
+            ImGui.popID();
+            ImGui.sameLine();
 
             ImGui.endTabItem();
         }

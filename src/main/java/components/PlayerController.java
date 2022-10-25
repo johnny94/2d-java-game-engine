@@ -297,6 +297,11 @@ public class PlayerController extends Component {
         stateMachine.trigger("powerup");
     }
 
+    public void setPosition(Vector2f position) {
+        gameObject.transform.position.set(position);
+        rigidBody2D.setPosition(position);
+    }
+
     private void checkOnGround() {
         float innerPlayerWidth = playerWidth * 0.6f;
         float yVal = playerState == PlayerState.Small ? -0.14f : -0.24f;

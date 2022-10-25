@@ -109,7 +109,6 @@ public class RigidBody2D extends Component {
     }
 
     public Vector2f getVelocity() {
-
         return velocity;
     }
 
@@ -120,7 +119,11 @@ public class RigidBody2D extends Component {
         }
     }
 
-
+    public void setPosition(Vector2f position) {
+        if (rawBody != null) {
+            rawBody.setTransform(new Vec2(position.x, position.y), gameObject.transform.rotation);
+        }
+    }
 
     public float getAngularDamping() {
         return angularDamping;
