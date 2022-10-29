@@ -24,6 +24,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
+import jade.Camera;
 import jade.Window;
 import util.AssetPool;
 import util.Color;
@@ -156,12 +157,23 @@ public final class DebugDraw {
     }
 
     public static void drawLine(Vector2f from, Vector2f to, Vector3f color, int lifeTime) {
-        if (lines.size() >= MAX_LINE) {
-            System.out.println("The number of lines exceed the limit: " + MAX_LINE);
+        if (lines.size() >= MAX_LINE || !lineInView(from, to)) {
             return;
         }
 
         lines.add(new Line2D(from, to, color, lifeTime));
+    }
+
+    private static boolean lineInView(Vector2f from, Vector2f to) {
+        // Note: Not the best implementation but works
+        Camera camera = Window.get().getCurrentScene().getCamera();
+        Vector2f leftBoundary = new Vector2f(camera.position).add(new Vector2f(-2.0f, -2.0f));
+        Vector2f rightBoundary = new Vector2f(camera.position)
+                .add(new Vector2f(camera.getProjectionSize())
+                             .mul(camera.getZoom()))
+                .add(new Vector2f(4.0f, 4.0f));
+        return ((from.x >= leftBoundary.x && from.x <= rightBoundary.x) && (from.y >= leftBoundary.y && from.y <= rightBoundary.y)) ||
+               ((to.x >= leftBoundary.x && to.x <= rightBoundary.x) && (to.y >= leftBoundary.y && to.y <= rightBoundary.y));
     }
 
     // =========================

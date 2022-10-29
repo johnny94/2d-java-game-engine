@@ -3,6 +3,7 @@ package jade;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 public class Camera {
     private static final int projectionWidth = 6;
@@ -12,6 +13,7 @@ public class Camera {
     private float zoom = 1.0f;
 
     public Vector2f position;
+    public Vector4f clearColor = new Vector4f(1, 1, 1, 1);
 
     private Matrix4f projectionMatrix = new Matrix4f();
     private Matrix4f inverseProjectionMatrix = new Matrix4f();

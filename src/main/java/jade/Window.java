@@ -52,6 +52,7 @@ import static org.lwjgl.opengl.GL11.glGetString;
 import static org.lwjgl.opengl.GL11.glViewport;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
+import org.joml.Vector4f;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.openal.AL;
@@ -70,6 +71,7 @@ import renderer.PickingTexture;
 import renderer.Renderer;
 import renderer.Shader;
 import scenes.LevelEditorSceneInitializer;
+import scenes.LevelSceneInitializer;
 import scenes.Scene;
 import scenes.SceneInitializer;
 import util.AssetPool;
@@ -111,7 +113,7 @@ public final class Window implements Observer {
             case GameEngineStartPlay:
                 this.runtimePlaying = true;
                 currentScene.save();
-                changeScene(new LevelEditorSceneInitializer());
+                changeScene(new LevelSceneInitializer());
                 break;
             case GameEngineStopPlay:
                 this.runtimePlaying = false;
@@ -283,7 +285,7 @@ public final class Window implements Observer {
             glDisable(GL_BLEND);
             pickingTexture.enableWriting();
             glViewport(0, 0, 3840, 2160);
-            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            glClearColor(0, 0, 0, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             Renderer.bindShader(pickingShader);
@@ -294,7 +296,8 @@ public final class Window implements Observer {
 
             // Render pass 2. Render to framebuffer
             framebuffer.bind();
-            glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            Vector4f clearColor = currentScene.getCamera().clearColor;
+            glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
             glClear(GL_COLOR_BUFFER_BIT);
 
             // NOTE: Maybe It will be better to merge update and sceneImGui method?

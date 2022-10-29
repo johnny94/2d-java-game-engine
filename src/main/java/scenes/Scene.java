@@ -52,7 +52,7 @@ public class Scene {
 
     public void start() {
         for (int i = 0; i < gameObjects.size(); i++) {
-            GameObject g =gameObjects.get(i);
+            GameObject g = gameObjects.get(i);
             g.start();
             this.renderer.add(g);
             this.physics2D.add(g);
@@ -147,6 +147,16 @@ public class Scene {
         return gameObjects.stream()
                           .filter(gameObject -> gameObject.name.equals(name))
                           .findFirst();
+    }
+
+    public <T extends Component> Optional<GameObject> getGameObjectWith(Class<T> clazz) {
+        for (GameObject gameObject : gameObjects) {
+            if (gameObject.getComponent(clazz).isPresent()) {
+                return Optional.of(gameObject);
+            }
+        }
+
+        return Optional.empty();
     }
 
     public Camera getCamera() {

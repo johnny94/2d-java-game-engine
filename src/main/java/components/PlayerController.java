@@ -17,7 +17,7 @@ import physics2d.Physics2D;
 import physics2d.components.PillBoxCollider;
 import physics2d.components.RigidBody2D;
 import physics2d.enums.BodyType;
-import scenes.LevelEditorSceneInitializer;
+import scenes.LevelSceneInitializer;
 import util.AssetPool;
 import util.JMath;
 
@@ -93,7 +93,7 @@ public class PlayerController extends Component {
                 rigidBody2D.setVelocity(velocity);
                 rigidBody2D.setAngularVelocity(0);
             } else if (!deadGoingUp && gameObject.transform.position.y <= deadMinHeight) {
-                Window.get().changeScene(new LevelEditorSceneInitializer());
+                Window.get().changeScene(new LevelSceneInitializer());
             }
             return;
         }
@@ -300,6 +300,10 @@ public class PlayerController extends Component {
     public void setPosition(Vector2f position) {
         gameObject.transform.position.set(position);
         rigidBody2D.setPosition(position);
+    }
+
+    public boolean hasWon() {
+        return false;
     }
 
     private void checkOnGround() {
