@@ -16,6 +16,7 @@ import components.game.Ground;
 import components.game.MushroomAI;
 import components.game.Pipe;
 import components.game.QuestionBlock;
+import components.game.TurtleAI;
 import physics2d.components.Box2DCollider;
 import physics2d.components.CircleCollider;
 import physics2d.components.PillBoxCollider;
@@ -296,6 +297,43 @@ public class Prefabs {
         goomba.addComponent(new GoombaAI());
 
         return goomba;
+    }
+
+    public static GameObject generateTurtle() {
+        SpriteSheet turtleSprites = AssetPool.getSpriteSheet("assets/images/spritesheets/turtle.png");
+        GameObject turtle = generateSpriteObject(turtleSprites.getSprite(0), 0.25f, 0.35f);
+
+        AnimationState walk = new AnimationState("Walk");
+        float defaultFrameTime = 0.23f;
+        walk.addFrame(turtleSprites.getSprite(0), defaultFrameTime);
+        walk.addFrame(turtleSprites.getSprite(1), defaultFrameTime);
+        walk.setLoop(true);
+
+        AnimationState squashed = new AnimationState("TurtleShellSpin");
+        squashed.addFrame(turtleSprites.getSprite(2), 0.1f);
+        squashed.setLoop(false);
+
+        StateMachine stateMachine = new StateMachine();
+        stateMachine.addState(walk);
+        stateMachine.addState(squashed);
+        stateMachine.setDefaultState(walk.title);
+        stateMachine.addTrigger(walk.title, squashed.title, "squashMe");
+        turtle.addComponent(stateMachine);
+
+        RigidBody2D rb = new RigidBody2D();
+        rb.setBodyType(BodyType.DYNAMIC);
+        rb.setMass(0.1f);
+        rb.setFixedRotation(true);
+        turtle.addComponent(rb);
+
+        CircleCollider circle = new CircleCollider();
+        circle.setRadius(0.13f);
+        circle.setOffset(new Vector2f(0, -0.05f));
+        turtle.addComponent(circle);
+
+        turtle.addComponent(new TurtleAI());
+
+        return turtle;
     }
 
     public static GameObject generateMushroom() {

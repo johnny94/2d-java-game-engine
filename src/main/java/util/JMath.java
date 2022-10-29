@@ -23,6 +23,10 @@ public final class JMath {
     }
 
     public static <T extends Number & Comparable<T>> T clamp(T value, T minValue, T maxValue) {
+        if (minValue.compareTo(maxValue) > 0) {
+            throw new IllegalArgumentException("minValue > maxValue");
+        }
+
         if (value.compareTo(minValue) < 0) {
             return minValue;
         }

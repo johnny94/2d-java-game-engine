@@ -96,7 +96,7 @@ public class GoombaAI extends Component {
         onGround = Physics2D.checkOnGround(gameObject, innerPlayerWidth, rayCastLength);
     }
 
-    private void stomp() {
+    public void stomp() {
         stomp(true);
     }
 

@@ -21,8 +21,6 @@ import physics2d.components.Box2DCollider;
 import physics2d.components.CircleCollider;
 import physics2d.components.PillBoxCollider;
 import physics2d.components.RigidBody2D;
-import renderer.DebugDraw;
-import util.Color;
 
 public class Physics2D {
     private Vec2 gravity = new Vec2(0, -10.0f);
@@ -225,8 +223,8 @@ public class Physics2D {
         Vector2f rayCastEnd2 = new Vector2f(rayCastEnd).add(innerPlayerWidth, 0);
         RayCastInfo right = Window.get().getPhysics().rayCast(gameObject, rayCastBegin2, rayCastEnd2);
 
-        DebugDraw.drawLine(rayCastBegin, rayCastEnd, Color.RED);
-        DebugDraw.drawLine(rayCastBegin2, rayCastEnd2, Color.RED);
+        //DebugDraw.drawLine(rayCastBegin, rayCastEnd, Color.RED);
+        //DebugDraw.drawLine(rayCastBegin2, rayCastEnd2, Color.RED);
 
         return (left.hit && left.hitObject != null && left.hitObject.getComponent(Ground.class).isPresent()) ||
                (right.hit && right.hitObject != null && right.hitObject.getComponent(Ground.class).isPresent());
