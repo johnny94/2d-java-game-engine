@@ -10,6 +10,7 @@ import components.animation.AnimationState;
 import components.animation.StateMachine;
 import components.game.BlockCoin;
 import components.game.Direction;
+import components.game.Flagpole;
 import components.game.Flower;
 import components.game.GoombaAI;
 import components.game.Ground;
@@ -334,6 +335,46 @@ public class Prefabs {
         turtle.addComponent(new TurtleAI());
 
         return turtle;
+    }
+
+    public static GameObject generateFlagTop() {
+        SpriteSheet items = AssetPool.getSpriteSheet("assets/images/spritesheets/items.png");
+        GameObject flag = generateSpriteObject(items.getSprite(6), 0.25f, 0.25f);
+
+        RigidBody2D rigidBody2D = new RigidBody2D();
+        rigidBody2D.setBodyType(BodyType.DYNAMIC);
+        rigidBody2D.setFixedRotation(true);
+        rigidBody2D.setContinuousCollision(false);
+        flag.addComponent(rigidBody2D);
+
+        Box2DCollider box2DCollider = new Box2DCollider();
+        box2DCollider.setHalfSize(new Vector2f(0.1f, 0.25f));
+        box2DCollider.setOffset(new Vector2f(-0.075f, 0));
+        flag.addComponent(box2DCollider);
+
+        flag.addComponent(new Flagpole(true));
+
+        return flag;
+    }
+
+    public static GameObject generateFlagPole() {
+        SpriteSheet items = AssetPool.getSpriteSheet("assets/images/spritesheets/items.png");
+        GameObject flag = generateSpriteObject(items.getSprite(33), 0.25f, 0.25f);
+
+        RigidBody2D rigidBody2D = new RigidBody2D();
+        rigidBody2D.setBodyType(BodyType.DYNAMIC);
+        rigidBody2D.setFixedRotation(true);
+        rigidBody2D.setContinuousCollision(false);
+        flag.addComponent(rigidBody2D);
+
+        Box2DCollider box2DCollider = new Box2DCollider();
+        box2DCollider.setHalfSize(new Vector2f(0.1f, 0.25f));
+        box2DCollider.setOffset(new Vector2f(-0.075f, 0));
+        flag.addComponent(box2DCollider);
+
+        flag.addComponent(new Flagpole(false));
+
+        return flag;
     }
 
     public static GameObject generateMushroom() {

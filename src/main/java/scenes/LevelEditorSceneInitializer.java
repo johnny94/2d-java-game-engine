@@ -286,6 +286,36 @@ public class LevelEditorSceneInitializer extends SceneInitializer {
             ImGui.popID();
             ImGui.sameLine();
 
+            // Flag
+            sprite = spriteSheet.getSprite(6);
+            texId = sprite.getTextureId();
+            texCoords = sprite.getTexCoords();
+            ImGui.pushID(uid++);
+            if (ImGui.imageButton(texId, widgetWidth, widgetHeight,
+                                  texCoords[2].x, texCoords[0].y,
+                                  texCoords[0].x, texCoords[2].y)) {
+                GameObject go = Prefabs.generateFlagTop();
+                levelEditorObject.getComponent(MouseControls.class)
+                                 .ifPresent(m -> m.pickUpObject(go));
+            }
+            ImGui.popID();
+            ImGui.sameLine();
+
+            // Flagpole
+            sprite = spriteSheet.getSprite(33);
+            texId = sprite.getTextureId();
+            texCoords = sprite.getTexCoords();
+            ImGui.pushID(uid++);
+            if (ImGui.imageButton(texId, widgetWidth, widgetHeight,
+                                  texCoords[2].x, texCoords[0].y,
+                                  texCoords[0].x, texCoords[2].y)) {
+                GameObject go = Prefabs.generateFlagPole();
+                levelEditorObject.getComponent(MouseControls.class)
+                                 .ifPresent(m -> m.pickUpObject(go));
+            }
+            ImGui.popID();
+            ImGui.sameLine();
+
             // Pipe
             SpriteSheet pipe = AssetPool.getSpriteSheet("assets/images/spritesheets/pipes.png");
             sprite = pipe.getSprite(0);

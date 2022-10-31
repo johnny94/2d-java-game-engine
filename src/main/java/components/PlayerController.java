@@ -64,6 +64,10 @@ public class PlayerController extends Component {
     private transient boolean isDead;
     private transient int enemyBounce;
 
+    private transient boolean playWinAnimation;
+    private transient float timeToCastle = 4.5f;
+    private transient float walkTime = 2.2f;
+
     @Override
     public void start() {
         assert gameObject.getComponent(RigidBody2D.class).isPresent() : "RigidBody2D should not be null";
@@ -80,6 +84,35 @@ public class PlayerController extends Component {
 
     @Override
     public void update(float deltaTime) {
+        if (playWinAnimation) {
+            checkOnGround();
+            if (!onGround) {
+                gameObject.transform.scale.x = -0.25f;
+                gameObject.transform.position.y -= deltaTime;
+                stateMachine.trigger("stopRunning");
+                stateMachine.trigger("stopJumping");
+            } else {
+                if (walkTime > 0) {
+                    gameObject.transform.scale.x = 0.25f;
+                    gameObject.transform.position.x += deltaTime;
+                    stateMachine.trigger("startRunning");
+                }
+            }
+            if (!AssetPool.getSound("assets/sounds/stage_clear.ogg").isPlaying()) {
+                AssetPool.getSound("assets/sounds/stage_clear.ogg").play();
+            }
+
+            // This is not good because Mario may don't have enough time to walk to castle.
+            // The better way is to walk until Mario touch the castle
+            timeToCastle -= deltaTime;
+            walkTime -= deltaTime;
+            if (timeToCastle < 0) {
+                Window.get().changeScene(new LevelSceneInitializer());
+            }
+
+            return;
+        }
+
         if (isDead) {
             if (gameObject.transform.position.y < deadMaxHeight && deadGoingUp) {
                 gameObject.transform.position.y += deltaTime * walkSpeed / 2.0f;
@@ -205,6 +238,19 @@ public class PlayerController extends Component {
         }
     }
 
+    public void playWinAnimation(GameObject flagPole) {
+        if (!playWinAnimation) {
+            playWinAnimation = true;
+            velocity.zero();
+            acceleration.zero();
+            rigidBody2D.setVelocity(velocity);
+            rigidBody2D.setIsSensor();
+            rigidBody2D.setBodyType(BodyType.STATIC);
+            gameObject.transform.position.x = flagPole.transform.position.x;
+            AssetPool.getSound("assets/sounds/flagpole.ogg").play();
+        }
+    }
+
     @Override
     public void beginCollision(GameObject collidingObject, Contact contact, Vector2f hitNormal) {
         if (isDead) {
@@ -231,7 +277,7 @@ public class PlayerController extends Component {
     }
 
     public boolean isHurtInvincible() {
-        return hurtInvincibilityTimeLeft > 0;
+        return hurtInvincibilityTimeLeft > 0 || playWinAnimation;
     }
 
     public boolean isInvincible() {
