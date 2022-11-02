@@ -66,7 +66,7 @@ public class GoombaAI extends Component {
             acceleration.y = Window.get().getPhysics().getGravity().y * 0.7f;
         }
 
-        velocity.y = acceleration.y * deltaTime;
+        velocity.y += acceleration.y * deltaTime;
         velocity.y = JMath.clamp(velocity.y, -terminalVelocity.y, terminalVelocity.y);
         rigidBody2D.setVelocity(velocity);
     }
@@ -90,6 +90,11 @@ public class GoombaAI extends Component {
         if (Math.abs(hitNormal.y) < 0.1) {
             goingRight = hitNormal.x < 0;
         }
+
+        collidingObject.getComponent(Fireball.class).ifPresent(fireball -> {
+            stomp();
+            fireball.disappear();
+        });
     }
 
     private void checkOnGround() {

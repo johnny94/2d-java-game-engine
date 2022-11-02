@@ -45,6 +45,6 @@ public final class KeyListener {
     }
 
     public boolean keyBeginPress(int key) {
-        return  keyBeginPressed[key];
+        return keyBeginPressed[key];
     }
 }

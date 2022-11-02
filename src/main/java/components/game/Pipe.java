@@ -47,22 +47,22 @@ public class Pipe extends Component {
             boolean playerEntering = false;
             switch(direction) {
                 case Up:
-                    if (keyListener.isKeyPressed(GLFW_KEY_DOWN) && isEntrance) {
+                    if (keyListener.isKeyPressed(GLFW_KEY_DOWN) && isEntrance && playerAtEntrance()) {
                         playerEntering = true;
                     }
                     break;
                 case Down:
-                    if (keyListener.isKeyPressed(GLFW_KEY_UP) && isEntrance) {
+                    if (keyListener.isKeyPressed(GLFW_KEY_UP) && isEntrance && playerAtEntrance()) {
                         playerEntering = true;
                     }
                     break;
                 case Left:
-                    if (keyListener.isKeyPressed(GLFW_KEY_RIGHT) && isEntrance) {
+                    if (keyListener.isKeyPressed(GLFW_KEY_RIGHT) && isEntrance && playerAtEntrance()) {
                         playerEntering = true;
                     }
                     break;
                 case Right:
-                    if (keyListener.isKeyPressed(GLFW_KEY_LEFT) && isEntrance) {
+                    if (keyListener.isKeyPressed(GLFW_KEY_LEFT) && isEntrance && playerAtEntrance()) {
                         playerEntering = true;
                     }
                     break;
@@ -75,33 +75,48 @@ public class Pipe extends Component {
         }
     }
 
+    public boolean playerAtEntrance() {
+        if (collidingPlayer == null) {
+            return false;
+        }
+
+        Vector2f pipeBottomLeft = new Vector2f(gameObject.transform.position)
+                .sub(new Vector2f(gameObject.transform.scale).mul(0.5f));
+        Vector2f pipeUpperRight = new Vector2f(gameObject.transform.position)
+                .add(new Vector2f(gameObject.transform.scale).mul(0.5f));
+
+        Vector2f playerBottomLeft = new Vector2f(collidingPlayer.gameObject.transform.position)
+                .sub(new Vector2f(collidingPlayer.gameObject.transform.scale).mul(0.5f));
+        Vector2f playerUpperRight = new Vector2f(collidingPlayer.gameObject.transform.position)
+                .add(new Vector2f(collidingPlayer.gameObject.transform.scale).mul(0.5f));
+
+
+        switch (direction) {
+            case Up:
+                return playerBottomLeft.y >= pipeUpperRight.y &&
+                       playerUpperRight.x > pipeBottomLeft.x &&
+                       playerBottomLeft.x < pipeUpperRight.x;
+            case Down:
+                return playerUpperRight.y <= pipeBottomLeft.y &&
+                       playerUpperRight.x > pipeBottomLeft.x &&
+                       playerBottomLeft.x < pipeUpperRight.x;
+            case Right:
+                return playerBottomLeft.x >= pipeUpperRight.x &&
+                       playerUpperRight.y > pipeBottomLeft.y &&
+                       playerBottomLeft.y < pipeUpperRight.y;
+            case Left:
+                return playerBottomLeft.x <= pipeBottomLeft.x &&
+                       playerUpperRight.y > pipeBottomLeft.y &&
+                       playerBottomLeft.y < pipeUpperRight.y;
+            default:
+                return false;
+        }
+    }
+
     @Override
     public void beginCollision(GameObject collidingObject, Contact contact, Vector2f hitNormal) {
         Optional<PlayerController> maybePlayerController = collidingObject.getComponent(PlayerController.class);
         if (maybePlayerController.isPresent()) {
-            switch (direction) {
-                case Up:
-                    if (hitNormal.y < entranceVectorTolerance) {
-                        return;
-                    }
-                    break;
-                case Down:
-                    if (hitNormal.y > -entranceVectorTolerance) {
-                        return;
-                    }
-                    break;
-                case Left:
-                    if (hitNormal.x > -entranceVectorTolerance) {
-                        return;
-                    }
-                    break;
-                case Right:
-                    if (hitNormal.x < entranceVectorTolerance) {
-                        return;
-                    }
-                    break;
-            }
-
             collidingPlayer = maybePlayerController.get();
         }
     }

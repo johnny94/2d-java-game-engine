@@ -1,5 +1,6 @@
 package components;
 
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_E;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
@@ -9,9 +10,11 @@ import org.joml.Vector2f;
 import org.joml.Vector4f;
 
 import components.animation.StateMachine;
+import components.game.Fireball;
 import components.game.Ground;
 import jade.GameObject;
 import jade.KeyListener;
+import jade.Prefabs;
 import jade.Window;
 import physics2d.Physics2D;
 import physics2d.components.PillBoxCollider;
@@ -182,6 +185,17 @@ public class PlayerController extends Component {
             if (velocity.x == 0) {
                 stateMachine.trigger("stopRunning");
             }
+        }
+
+        if (keyListener.keyBeginPress(GLFW_KEY_E) &&
+            playerState == PlayerState.Fire && Fireball.canSpawn()) {
+            boolean faceRight = gameObject.transform.scale.x > 0;
+            float offset = faceRight ? 0.26f : -0.26f;
+            Vector2f position = new Vector2f(gameObject.transform.position).add(offset, 0f);
+            GameObject fireball = Prefabs.generateFireball(position);
+            fireball.getComponent(Fireball.class).ifPresent(ball -> ball.goingRight = faceRight);
+
+            Window.get().getCurrentScene().addGameObject(fireball);
         }
 
         checkOnGround();

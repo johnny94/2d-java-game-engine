@@ -10,6 +10,7 @@ import components.animation.AnimationState;
 import components.animation.StateMachine;
 import components.game.BlockCoin;
 import components.game.Direction;
+import components.game.Fireball;
 import components.game.Flagpole;
 import components.game.Flower;
 import components.game.GoombaAI;
@@ -375,6 +376,26 @@ public class Prefabs {
         flag.addComponent(new Flagpole(false));
 
         return flag;
+    }
+
+    public static GameObject generateFireball(Vector2f position) {
+        SpriteSheet items = AssetPool.getSpriteSheet("assets/images/spritesheets/items.png");
+        GameObject fireball = generateSpriteObject(items.getSprite(32), 0.18f, 0.18f);
+        fireball.transform.position.set(position);
+
+        RigidBody2D rigidBody2D = new RigidBody2D();
+        rigidBody2D.setBodyType(BodyType.DYNAMIC);
+        rigidBody2D.setFixedRotation(true);
+        rigidBody2D.setContinuousCollision(false);
+        fireball.addComponent(rigidBody2D);
+
+        CircleCollider circleCollider = new CircleCollider();
+        circleCollider.setRadius(0.08f);
+        fireball.addComponent(circleCollider);
+
+        fireball.addComponent(new Fireball());
+
+        return fireball;
     }
 
     public static GameObject generateMushroom() {
